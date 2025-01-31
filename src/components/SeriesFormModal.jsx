@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 import { ImageUpload } from "./ImageUpload";
 import { SubmitLoading } from "./SubmitLoading";
 import { AddCircleOutline, Edit } from "@mui/icons-material";
+import { useAddSerie } from "../hooks/useSeriesData";
 
 const SeriesFormModal = ({
   handleCloseModal,
@@ -29,11 +30,11 @@ const SeriesFormModal = ({
     formState: { errors },
   } = useForm();
 
-  console.log(errors);
   const [coverFile, setCoverFile] = useState(null);
   const [bannerFile, setBannerFile] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  const { handleAddSerie, loading, success, errorMessage } = useAddSerie();
 
   // Establecer valores iniciales cuando `selectedSerie` cambie
   useEffect(() => {
@@ -53,27 +54,31 @@ const SeriesFormModal = ({
   }, [selectedSerie, setValue, reset]);
 
   const onSubmit = async (data) => {
-    setIsSubmitting(true);
+    const newSerie = {
+      ...data,
+      cover_image: coverFile || "",
+      banner_image: bannerFile || "",
+    };
+    console.log(newSerie);
+
     try {
-      // Aquí podrías hacer la llamada a la API
-      setTimeout(() => {
-        console.log(data);
-        setSnackbarOpen(true);
-        setIsSubmitting(false);
-      }, 2000);
+      await handleAddSerie(newSerie);
+      setSnackbarOpen(true);
     } catch (error) {
       console.error(error);
     } finally {
+      // handleCloseSnackbar();
     }
   };
 
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
   };
+
   return (
     <Dialog open={openModal} onClose={handleCloseModal} fullWidth maxWidth="sm">
       <form onSubmit={handleSubmit(onSubmit)}>
-        {/*FORMULARIO TITULO */}
+        {/* FORMULARIO TITULO */}
         <DialogTitle color="primary">
           <Box
             sx={{
@@ -154,7 +159,7 @@ const SeriesFormModal = ({
           )}
 
           <TextField
-            id="slig-outlined-basic"
+            id="slug-outlined-basic"
             label="Slug"
             type="text"
             variant="standard"
@@ -165,7 +170,7 @@ const SeriesFormModal = ({
             <Typography color="error">Slug is required</Typography>
           ) : (
             errors.slug?.type === "maxLength" && (
-              <Typography color="error">MaxLengrh 20</Typography>
+              <Typography color="error">Max Length 20</Typography>
             )
           )}
 
@@ -184,7 +189,8 @@ const SeriesFormModal = ({
                 selectedFileImage={coverFile}
                 setSelectedFile={setCoverFile}
                 selectedSerie={selectedSerie}
-              ></ImageUpload>
+                loading={loading}
+              />
             </Grid2>
             <Grid2 item size={{ xs: 12, sm: 6 }}>
               <ImageUpload
@@ -192,7 +198,8 @@ const SeriesFormModal = ({
                 selectedFileImage={bannerFile}
                 setSelectedFile={setBannerFile}
                 selectedSerie={selectedSerie}
-              ></ImageUpload>
+                loading={loading}
+              />
             </Grid2>
           </Grid2>
 
@@ -202,7 +209,9 @@ const SeriesFormModal = ({
             open={snackbarOpen}
             onClose={handleCloseSnackbar}
             errors={errors}
-            isSubmitting={isSubmitting}
+            isSubmitting={loading}
+            success={success}
+            errorMessage={errorMessage}
           />
         </DialogContent>
         <DialogActions>
@@ -211,9 +220,9 @@ const SeriesFormModal = ({
             type="submit"
             variant="contained"
             color="primary"
-            disabled={isSubmitting}
+            disabled={loading}
           >
-            {isSubmitting
+            {loading
               ? "Submitting"
               : selectedSerie
               ? "Save Changes"

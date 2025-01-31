@@ -14,6 +14,7 @@ export const ImageUpload = ({
   selectedFileImage,
   setSelectedFile,
   selectedSerie,
+  loading,
 }) => {
   const fileInputRef = useRef(null);
   const handleFileChange = (event) => {
@@ -42,7 +43,12 @@ export const ImageUpload = ({
         flexDirection: "column",
       }}
     >
-      <Button color="primary" variant="contained" component="label">
+      <Button
+        color="primary"
+        variant="contained"
+        component="label"
+        disabled={loading}
+      >
         {`Select ${message}`}
 
         <input
