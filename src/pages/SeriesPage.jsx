@@ -8,10 +8,11 @@ import SerieFilters from "../components/SerieFilters";
 
 import AddButton from "../components/AddButton";
 import SeriesList from "../components/SeriesList";
-import SeriesFormModal from "../components/SeriesFormModal";
+
 import { useSeriesData } from "../hooks/useSeriesData";
 import { Loading } from "../components/Loading";
 import { supabase } from "../../config/supabaseClient";
+import { SeriesFormModal } from "../components/SeriesFormModal";
 
 // const initialSeries = [
 //   {
@@ -68,49 +69,24 @@ export default function SeriesPage() {
     console.log("HANDLE CLOSE MODAL");
   }, []);
 
-  const handleSaveSeries = (event) => {
-    //Codigo para agragar serie
-    handleCloseModal();
-  };
+  const handleDeleteSeries = async (id) => {
+    try {
+      const { error } = await supabase.from("series").delete().eq("id", id);
 
-  const handleDeleteSeries = (id) => {
-    setSeries(series.filter((s) => s.id !== id));
+      if (error) throw error;
+
+      // Actualizar datos después de eliminar
+      // const updatedSeries = seriesData.filter(serie => serie.id !== id);
+      // setSeries(updatedSeries); // Si usas estado local
+    } catch (error) {
+      console.error("Error eliminando serie:", error);
+    }
   };
 
   if (isLoadingSeriesData) return <Loading />;
   if (isErrorSeriesData) return <div>{errorSeriesData}</div>;
 
   console.log(seriesData);
-
-  // const checkRole = async (roleName = "") => {
-  //   const { data, error } = await supabase
-  //     .rpc("has_role", { role_name: roleName })
-  //     .single();
-
-  //   if (error) {
-  //     console.error("Error checking role:", error);
-  //   } else {
-  //     console.log(`User has role "${roleName}":`, data);
-  //   }
-  // };
-
-  // checkRole("admin");
-  // checkRole("editor");
-
-  // const getUserId = async () => {
-  //   const { data } = await supabase.auth.getUser();
-  //   const user = data.user;
-  //   console.log(user);
-  //   console.log(typeof user.id);
-
-  //   if (user) {
-  //     console.log("User ID:", user.id);
-  //   } else {
-  //     console.log("No authenticated user");
-  //   }
-  // };
-
-  // getUserId();
 
   return (
     <>
@@ -134,7 +110,6 @@ export default function SeriesPage() {
 
         <SeriesFormModal
           handleCloseModal={handleCloseModal} //Manejador para cerrar el modal
-          handleSaveSeries={handleSaveSeries} //Manejador para guardar serie
           openModal={openModal} //Estado del modal
           selectedSerie={selectedSerie} //Enviar la serie actual
         ></SeriesFormModal>

@@ -82,7 +82,7 @@ const SeriesList = React.memo(
                     {serie.release_year}
                   </Typography>
                   <Typography variant="body2">
-                    <Icons.Star /> {serie.rating.toFixed(1)}
+                    <Icons.Star /> {serie.rating?.toFixed(1)}
                   </Typography>
                 </Box>
                 <Box

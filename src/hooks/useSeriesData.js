@@ -30,7 +30,7 @@ export const useAddSerie = () => {
     setErrorMessage("");
 
     try {
-      const { data } = await addSerie(newSerie).unwrap();
+      await addSerie(newSerie).unwrap();
 
       setSuccess(true);
     } catch (err) {

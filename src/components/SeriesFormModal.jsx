@@ -14,11 +14,13 @@ import { useForm } from "react-hook-form";
 import { ImageUpload } from "./ImageUpload";
 import { SubmitLoading } from "./SubmitLoading";
 import { AddCircleOutline, Edit } from "@mui/icons-material";
-import { useAddSerie } from "../hooks/useSeriesData";
 
-const SeriesFormModal = ({
+import { uploadImageToStorage } from "../utils/imageUtils";
+import { useAddSerie } from "../hooks/useSeriesData"; // Importa el hook de mutación
+import { supabase } from "../../config/supabaseClient";
+
+export const SeriesFormModal = ({
   handleCloseModal,
-  handleSaveSeries,
   openModal,
   selectedSerie,
 }) => {
@@ -30,200 +32,246 @@ const SeriesFormModal = ({
     formState: { errors },
   } = useForm();
 
-  const [coverFile, setCoverFile] = useState(null);
-  const [bannerFile, setBannerFile] = useState(null);
+  const [coverImage, setCoverImage] = useState({ file: null, url: "" });
+  const [bannerImage, setBannerImage] = useState({ file: null, url: "" });
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
+  // Usa el hook de mutación
   const { handleAddSerie, loading, success, errorMessage } = useAddSerie();
 
-  // Establecer valores iniciales cuando `selectedSerie` cambie
+  // Inicializar formulario
   useEffect(() => {
     if (selectedSerie) {
-      // Se establece los valores iniciales para las campos del formulario
-      setValue("title", selectedSerie.title || "");
-      setValue("description", selectedSerie.description || "");
-      setValue("rating", selectedSerie.rating || 0);
-      setValue("slug", selectedSerie.slug || "");
-      setCoverFile(selectedSerie.cover_image || null); // Imagen de portada
-      setBannerFile(selectedSerie.banner_image || null); // Imagen de banner
+      setValue("title", selectedSerie.title);
+      setValue("description", selectedSerie.description);
+      setValue("rating", selectedSerie.rating);
+      setValue("slug", selectedSerie.slug);
+      setValue("release_year", selectedSerie.release_year);
+      setCoverImage({ file: null, url: selectedSerie.cover_image });
+      setBannerImage({ file: null, url: selectedSerie.banner_image });
     } else {
-      reset(); // Limpia el formulario si no hay serie actual
-      setCoverFile(null);
-      setBannerFile(null);
+      reset();
+      setCoverImage({ file: null, url: "" });
+      setBannerImage({ file: null, url: "" });
     }
   }, [selectedSerie, setValue, reset]);
 
-  const onSubmit = async (data) => {
-    const newSerie = {
-      ...data,
-      cover_image: coverFile || "",
-      banner_image: bannerFile || "",
-    };
-    console.log(newSerie);
+  const handleDeleteOldImage = async (imageUrl) => {
+    if (!imageUrl || !selectedSerie) return;
 
     try {
-      await handleAddSerie(newSerie);
-      setSnackbarOpen(true);
+      const path = imageUrl.split("/").pop();
+      const { error } = await supabase.storage
+        .from("SeriesZenMedia")
+        .remove([path]);
+
+      if (error) throw error;
     } catch (error) {
-      console.error(error);
-    } finally {
-      // handleCloseSnackbar();
+      console.error("Error deleting old image:", error);
     }
   };
 
-  const handleCloseSnackbar = () => {
-    setSnackbarOpen(false);
-  };
+  const onSubmit = async (formData) => {
+    try {
+      const cleanedData = {
+        title: formData.title, // Asegura que title no esté vacío
+        slug: formData.slug, // Asegura que slug no esté vacío
+        description: formData.description, // Convierte "" a null
+        // Solo envía rating si tiene valor, de lo contrario no lo incluyas
+        ...(formData.rating && { rating: parseFloat(formData.rating) }),
+        // Solo envía release_year si tiene valor, de lo contrario no lo incluyas
+        ...(formData.release_year && {
+          release_year: parseInt(formData.release_year),
+        }),
+      };
 
+      let coverUrl = coverImage.url;
+      let bannerUrl = bannerImage.url;
+
+      // Eliminar imágenes antiguas si se están subiendo nuevas
+      if (selectedSerie?.cover_image && coverImage.file) {
+        await handleDeleteOldImage(selectedSerie.cover_image);
+      }
+      if (selectedSerie?.banner_image && bannerImage.file) {
+        await handleDeleteOldImage(selectedSerie.banner_image);
+      }
+
+      // Subir nuevas imágenes si existen
+      if (coverImage.file) {
+        const { data: coverData, error: coverError } =
+          await uploadImageToStorage(coverImage.file, "covers");
+        if (coverError) throw coverError;
+        coverUrl = coverData.publicUrl;
+        // coverUrl = coverData;
+      }
+
+      if (bannerImage.file) {
+        const { data: bannerData, error: bannerError } =
+          await uploadImageToStorage(bannerImage.file, "banners");
+        console.log(bannerData.publicUrl);
+        console.log(bannerError);
+
+        if (bannerError) throw bannerError;
+        bannerUrl = bannerData.publicUrl;
+        // bannerUrl = bannerData;
+      }
+      console.log(bannerUrl);
+
+      // Crear objeto con los datos de la serie
+      const newSerie = {
+        ...cleanedData,
+        cover_image: coverUrl,
+        banner_image: bannerUrl,
+      };
+
+      console.log("Datos de la serie a guardar:", newSerie); // Verifica que las URLs estén correctas
+
+      // Usar la mutación para agregar/editar la serie
+      await handleAddSerie(newSerie);
+
+      // Cerrar el modal si la operación fue exitosa
+      if (success) {
+        handleCloseModal();
+      }
+    } catch (error) {
+      console.error("Error saving series:", error);
+      setErrorMessage(error.message || "Error saving series");
+    }
+  };
   return (
     <Dialog open={openModal} onClose={handleCloseModal} fullWidth maxWidth="sm">
       <form onSubmit={handleSubmit(onSubmit)}>
-        {/* FORMULARIO TITULO */}
         <DialogTitle color="primary">
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-            }}
-          >
-            {selectedSerie ? (
-              <Edit color="primary" fontSize="large" />
-            ) : (
-              <AddCircleOutline color="primary" fontSize="large" />
-            )}
-            <Typography
-              variant="h6"
-              sx={{
-                color: "primary.main",
-                textTransform: "uppercase",
-                letterSpacing: 1,
-              }}
-            >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {selectedSerie ? <Edit /> : <AddCircleOutline />}
+            <Typography variant="h6">
               {selectedSerie ? "Edit Serie" : "Add New Serie"}
             </Typography>
           </Box>
         </DialogTitle>
 
-        {/* FORMULARIO CONTENIDO */}
-        <DialogContent
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-            mt: 2,
-          }}
-        >
+        <DialogContent sx={{ mt: 2 }}>
+          {/* Campos del formulario */}
           <TextField
-            id="title-outlined-basic"
             label="Title"
             variant="standard"
-            type="text"
-            placeholder="Stranger Things"
-            {...register("title", { required: true, maxLength: 255 })}
-            aria-invalid={errors.title ? "true" : "false"}
+            fullWidth
+            margin="normal"
+            {...register("title", { required: "Title is required" })}
+            error={!!errors.title}
+            helperText={errors.title?.message}
           />
-          {errors.title?.type === "required" && (
-            <Typography color="error">Title is required</Typography>
-          )}
+
           <TextField
-            id="description-outlined-basic"
             label="Description"
             variant="standard"
-            type="text"
+            fullWidth
+            margin="normal"
             multiline
             rows={4}
-            placeholder="A group of kids face supernatural..."
-            {...register("description")}
+            {...register("description", {
+              // required: "Description is required",
+            })}
+            error={!!errors.description}
+            helperText={errors.description?.message}
           />
+
           <TextField
-            id="rating-outlined-basic"
             label="Rating"
             variant="standard"
+            fullWidth
+            margin="normal"
             type="number"
-            placeholder="5.5"
-            slotProps={{
-              htmlInput: {
-                max: 10, // Límite máximo
-                min: 0, // Límite mínimo
-                step: 0.1,
-              },
-            }}
-            {...register("rating", { max: 10, min: 0 })}
+            inputProps={{ min: 0, max: 10, step: 0.1 }}
+            {...register("rating", {
+              //required: "Rating is required",
+              min: { value: 0, message: "Rating must be at least 0" },
+              max: { value: 10, message: "Rating must be at most 10" },
+            })}
+            error={!!errors.rating}
+            helperText={errors.rating?.message}
           />
-          {errors.rating?.type === "max" && (
-            <Typography color="error">Max rating 10</Typography>
-          )}
-          {errors.rating?.type === "min" && (
-            <Typography color="error">Min rating 0</Typography>
-          )}
 
           <TextField
-            id="slug-outlined-basic"
             label="Slug"
-            type="text"
             variant="standard"
-            placeholder="stranger-things"
-            {...register("slug", { required: true, maxLength: 20 })}
+            fullWidth
+            margin="normal"
+            {...register("slug", { required: "Slug is required" })}
+            error={!!errors.slug}
+            helperText={errors.slug?.message}
           />
-          {errors.slug?.type === "required" ? (
-            <Typography color="error">Slug is required</Typography>
-          ) : (
-            errors.slug?.type === "maxLength" && (
-              <Typography color="error">Max Length 20</Typography>
-            )
-          )}
 
-          {/*------------------------ IMAGENES---------------------- */}
+          <TextField
+            label="Release Year"
+            variant="standard"
+            fullWidth
+            margin="normal"
+            type="number"
+            inputProps={{ min: 1900, max: new Date().getFullYear() }}
+            {...register("release_year", {
+              // required: "Release year is required",
+              min: { value: 1900, message: "Year must be at least 1900" },
+              max: {
+                value: new Date().getFullYear(),
+                message: `Year must be at most ${new Date().getFullYear()}`,
+              },
+            })}
+            error={!!errors.release_year}
+            helperText={errors.release_year?.message}
+          />
 
-          <Grid2
-            container
-            spacing={2}
-            justifyContent={"center"}
-            alignItems={"center"}
-            mt={4}
-          >
-            <Grid2 item size={{ xs: 12, sm: 6 }}>
+          {/* Subida de imágenes */}
+          <Grid2 container spacing={2} mt={2}>
+            <Grid2 item xs={12} sm={6}>
               <ImageUpload
-                message={"Cover"}
-                selectedFileImage={coverFile}
-                setSelectedFile={setCoverFile}
-                selectedSerie={selectedSerie}
+                message="Cover"
+                currentImage={coverImage.url}
+                onImageChange={(file) =>
+                  setCoverImage({
+                    file,
+                    url: file ? URL.createObjectURL(file) : "",
+                  })
+                }
                 loading={loading}
               />
             </Grid2>
-            <Grid2 item size={{ xs: 12, sm: 6 }}>
+
+            <Grid2 item xs={12} sm={6}>
               <ImageUpload
-                message={"Banner"}
-                selectedFileImage={bannerFile}
-                setSelectedFile={setBannerFile}
-                selectedSerie={selectedSerie}
+                message="Banner"
+                currentImage={bannerImage.url}
+                onImageChange={(file) =>
+                  setBannerImage({
+                    file,
+                    url: file ? URL.createObjectURL(file) : "",
+                  })
+                }
                 loading={loading}
               />
             </Grid2>
           </Grid2>
 
-          {/* SUBMIT */}
-
+          {/* Notificaciones */}
           <SubmitLoading
             open={snackbarOpen}
-            onClose={handleCloseSnackbar}
-            errors={errors}
+            onClose={() => setSnackbarOpen(false)}
             isSubmitting={loading}
             success={success}
             errorMessage={errorMessage}
+            isEditing={!!selectedSerie}
           />
         </DialogContent>
+
         <DialogActions>
           <Button
-            sx={{ margin: "20px auto" }}
             type="submit"
             variant="contained"
             color="primary"
             disabled={loading}
           >
             {loading
-              ? "Submitting"
+              ? "Saving..."
               : selectedSerie
               ? "Save Changes"
               : "Add Serie"}
@@ -233,5 +281,3 @@ const SeriesFormModal = ({
     </Dialog>
   );
 };
-
-export default SeriesFormModal;

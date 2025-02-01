@@ -4,10 +4,10 @@ import React from "react";
 export const SubmitLoading = ({
   open,
   onClose,
-  errors,
   isSubmitting,
   success,
   errorMessage,
+  isEditing, // Nueva prop para saber si estamos editando
 }) => {
   return (
     <>
@@ -16,21 +16,19 @@ export const SubmitLoading = ({
         open={open}
         autoHideDuration={3000}
         onClose={onClose}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        {Object.keys(errors).length > 0 ? (
+        {errorMessage ? (
           <Alert onClose={onClose} severity="error">
-            Por favor, corrige los errores en el formulario.
+            {errorMessage}
           </Alert>
         ) : success ? (
           <Alert onClose={onClose} severity="success">
-            Archivo subido exitosamente
+            {isEditing
+              ? "Serie actualizada exitosamente"
+              : "Serie creada exitosamente"}
           </Alert>
-        ) : (
-          <Alert onClose={onClose} severity="warning">
-            El archivo no pudo subirse {errorMessage}
-          </Alert>
-        )}
+        ) : null}
       </Snackbar>
     </>
   );

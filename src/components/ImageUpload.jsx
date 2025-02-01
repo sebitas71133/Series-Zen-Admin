@@ -1,108 +1,80 @@
-import {
-  Alert,
-  Box,
-  Button,
-  LinearProgress,
-  Snackbar,
-  Typography,
-} from "@mui/material";
-import React, { useRef, useState } from "react";
+import { Box, Button, Typography } from "@mui/material";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
+import React, { useRef } from "react";
 
 export const ImageUpload = ({
   message,
-  selectedFileImage,
-  setSelectedFile,
-  selectedSerie,
+  currentImage,
+  onImageChange,
   loading,
 }) => {
   const fileInputRef = useRef(null);
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file && file.type.startsWith("image/")) {
-      setSelectedFile(file);
-    } else {
-      setSelectedFile(null);
-      console.warn("You must selected an valid file");
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file");
+      return;
     }
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Image must be smaller than 2MB");
+      return;
+    }
+
+    onImageChange(file);
   };
 
-  const handleCancel = () => {
-    setSelectedFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+  const handleRemove = () => {
+    onImageChange(null);
+    fileInputRef.current.value = "";
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "column",
-      }}
-    >
+    <Box sx={{ textAlign: "center" }}>
       <Button
-        color="primary"
-        variant="contained"
         component="label"
+        variant="contained"
         disabled={loading}
+        startIcon={<FileUploadIcon />}
       >
-        {`Select ${message}`}
-
+        {`Upload ${message}`}
         <input
-          id="file-input"
           type="file"
-          onChange={handleFileChange}
           hidden
+          onChange={handleFileChange}
           accept="image/*"
           ref={fileInputRef}
         />
-        <FileUploadIcon />
       </Button>
-      <Box>
-        {selectedFileImage && (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              flexDirection: "column",
+
+      {(currentImage || fileInputRef.current?.files[0]) && (
+        <Box mt={2}>
+          <Typography variant="subtitle2">{`${message} Preview:`}</Typography>
+          <img
+            src={
+              currentImage || URL.createObjectURL(fileInputRef.current.files[0])
+            }
+            alt={`${message} preview`}
+            style={{
+              maxWidth: "100%",
+              maxHeight: "200px",
+              borderRadius: "8px",
+              marginTop: "8px",
             }}
+          />
+          <Button
+            onClick={handleRemove}
+            color="error"
+            size="small"
+            sx={{ mt: 1 }}
           >
-            {/* Se muestra la imagen seleccionada actualmente o anteriormente */}
-            <Typography variant="subtitle1">{`${message} preview: `}</Typography>
-            <img
-              src={
-                selectedFileImage && selectedFileImage instanceof File
-                  ? URL.createObjectURL(selectedFileImage) // Solo crear un objeto URL si es un archivo
-                  : message === "Cover"
-                  ? selectedSerie?.cover_image ||
-                    "https://picsum.photos/200/300"
-                  : selectedSerie?.banner_image ||
-                    "https://picsum.photos/200/300"
-              }
-              alt={message === "Cover" ? "Cover Preview" : "Banner Preview"}
-              style={{
-                maxWidth: "100%",
-                marginTop: 10,
-                margin: "auto",
-                borderRadius: "10px",
-              }}
-            />
-            {/* Cancelar imagen elegida */}
-            <Button
-              onClick={handleCancel}
-              variant="outlined"
-              color="secondary"
-              sx={{ marginTop: 2 }}
-            >
-              Cancel
-            </Button>
-          </Box>
-        )}
-      </Box>
+            Remove
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 };
