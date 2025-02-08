@@ -16,13 +16,13 @@ import { SubmitLoading } from "./SubmitLoading";
 import { AddCircleOutline, Edit } from "@mui/icons-material";
 
 import { uploadImageToStorage } from "../utils/imageUtils";
-import { useAddSerie } from "../hooks/useSeriesData"; // Importa el hook de mutación
-import { supabase } from "../../config/supabaseClient";
 
 export const SeriesFormModal = ({
   handleCloseModal,
   openModal,
-  selectedSerie,
+  selectedSerieToEdit,
+  onSubmit,
+  isLoading,
 }) => {
   const {
     register,
@@ -34,86 +34,70 @@ export const SeriesFormModal = ({
 
   const [coverImage, setCoverImage] = useState({ file: null, url: "" });
   const [bannerImage, setBannerImage] = useState({ file: null, url: "" });
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-  // Usa el hook de mutación
-  const { handleAddSerie, loading, success, errorMessage } = useAddSerie();
-
-  // Inicializar formulario
   useEffect(() => {
-    if (selectedSerie) {
-      setValue("title", selectedSerie.title);
-      setValue("description", selectedSerie.description);
-      setValue("rating", selectedSerie.rating);
-      setValue("slug", selectedSerie.slug);
-      setValue("release_year", selectedSerie.release_year);
-      setCoverImage({ file: null, url: selectedSerie.cover_image });
-      setBannerImage({ file: null, url: selectedSerie.banner_image });
+    if (selectedSerieToEdit) {
+      setValue("title", selectedSerieToEdit.title);
+      setValue("description", selectedSerieToEdit.description);
+      setValue("rating", selectedSerieToEdit.rating);
+      setValue("slug", selectedSerieToEdit.slug);
+      setValue("release_year", selectedSerieToEdit.release_year);
+      setCoverImage({ file: null, url: selectedSerieToEdit.cover_image });
+      setBannerImage({ file: null, url: selectedSerieToEdit.banner_image });
+
+      console.log("seleccionado serie");
     } else {
       reset();
       setCoverImage({ file: null, url: "" });
       setBannerImage({ file: null, url: "" });
+      console.log("serie no eleccionada serie");
     }
-  }, [selectedSerie, setValue, reset]);
 
-  const handleDeleteOldImage = async (imageUrl) => {
-    if (!imageUrl || !selectedSerie) return;
+    console.log("effect", selectedSerieToEdit);
+  }, [selectedSerieToEdit, setValue]);
 
-    try {
-      const path = imageUrl.split("/").pop();
-      const { error } = await supabase.storage
-        .from("SeriesZenMedia")
-        .remove([path]);
+  const onSubmitForm = async (formData) => {
+    console.log(formData);
 
-      if (error) throw error;
-    } catch (error) {
-      console.error("Error deleting old image:", error);
-    }
-  };
-
-  const onSubmit = async (formData) => {
     try {
       const cleanedData = {
         title: formData.title, // Asegura que title no esté vacío
         slug: formData.slug, // Asegura que slug no esté vacío
-        description: formData.description, // Convierte "" a null
+        description: formData.description || "", // Convierte "" a null
         // Solo envía rating si tiene valor, de lo contrario no lo incluyas
         ...(formData.rating && { rating: parseFloat(formData.rating) }),
         // Solo envía release_year si tiene valor, de lo contrario no lo incluyas
         ...(formData.release_year && {
           release_year: parseInt(formData.release_year),
         }),
+        ...(selectedSerieToEdit && { id: parseInt(selectedSerieToEdit.id) }),
       };
 
       let coverUrl = coverImage.url;
       let bannerUrl = bannerImage.url;
 
-      // Eliminar imágenes antiguas si se están subiendo nuevas
-      if (selectedSerie?.cover_image && coverImage.file) {
-        await handleDeleteOldImage(selectedSerie.cover_image);
-      }
-      if (selectedSerie?.banner_image && bannerImage.file) {
-        await handleDeleteOldImage(selectedSerie.banner_image);
-      }
-
       // Subir nuevas imágenes si existen
       if (coverImage.file) {
         const { data: coverData, error: coverError } =
-          await uploadImageToStorage(coverImage.file, "covers");
+          await uploadImageToStorage(
+            coverImage.file,
+            "covers",
+            selectedSerieToEdit?.cover_image
+          );
         if (coverError) throw coverError;
         coverUrl = coverData.publicUrl;
-        // coverUrl = coverData;
       }
 
       if (bannerImage.file) {
         const { data: bannerData, error: bannerError } =
-          await uploadImageToStorage(bannerImage.file, "banners");
-        console.log(bannerData.publicUrl);
-        console.log(bannerError);
+          await uploadImageToStorage(
+            bannerImage.file,
+            "banners",
+            selectedSerieToEdit?.banner_image
+          );
 
         if (bannerError) throw bannerError;
         bannerUrl = bannerData.publicUrl;
-        // bannerUrl = bannerData;
       }
       console.log(bannerUrl);
 
@@ -124,28 +108,22 @@ export const SeriesFormModal = ({
         banner_image: bannerUrl,
       };
 
-      console.log("Datos de la serie a guardar:", newSerie); // Verifica que las URLs estén correctas
+      console.log("Datos de la serie a guardar/editar:", newSerie); // Verifica que las URLs estén correctas
 
-      // Usar la mutación para agregar/editar la serie
-      await handleAddSerie(newSerie);
-
-      // Cerrar el modal si la operación fue exitosa
-      if (success) {
-        handleCloseModal();
-      }
+      await onSubmit(newSerie, !!selectedSerieToEdit);
     } catch (error) {
-      console.error("Error saving series:", error);
-      setErrorMessage(error.message || "Error saving series");
+      console.error("Error saving o editting series:", error);
+      //setErrorMessage(error.message || "Error saving series");
     }
   };
   return (
     <Dialog open={openModal} onClose={handleCloseModal} fullWidth maxWidth="sm">
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmitForm)}>
         <DialogTitle color="primary">
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {selectedSerie ? <Edit /> : <AddCircleOutline />}
+            {selectedSerieToEdit ? <Edit /> : <AddCircleOutline />}
             <Typography variant="h6">
-              {selectedSerie ? "Edit Serie" : "Add New Serie"}
+              {selectedSerieToEdit ? "Edit Serie" : "Add New Serie"}
             </Typography>
           </Box>
         </DialogTitle>
@@ -223,7 +201,7 @@ export const SeriesFormModal = ({
 
           {/* Subida de imágenes */}
           <Grid2 container spacing={2} mt={2}>
-            <Grid2 item xs={12} sm={6}>
+            <Grid2 xs={12} sm={6}>
               <ImageUpload
                 message="Cover"
                 currentImage={coverImage.url}
@@ -233,11 +211,11 @@ export const SeriesFormModal = ({
                     url: file ? URL.createObjectURL(file) : "",
                   })
                 }
-                loading={loading}
+                isAddingSerie={isLoading}
               />
             </Grid2>
 
-            <Grid2 item xs={12} sm={6}>
+            <Grid2 xs={12} sm={6}>
               <ImageUpload
                 message="Banner"
                 currentImage={bannerImage.url}
@@ -247,20 +225,20 @@ export const SeriesFormModal = ({
                     url: file ? URL.createObjectURL(file) : "",
                   })
                 }
-                loading={loading}
+                isAddingSerie={isLoading}
               />
             </Grid2>
           </Grid2>
 
           {/* Notificaciones */}
-          <SubmitLoading
+          {/* <SubmitLoading
             open={snackbarOpen}
             onClose={() => setSnackbarOpen(false)}
-            isSubmitting={loading}
-            success={success}
-            errorMessage={errorMessage}
-            isEditing={!!selectedSerie}
-          />
+            isSubmitting={isAddingSerie}
+            success={isAddSerieSuccess}
+            errorMessage={addSerieErrorMessage}
+            isEditing={!!selectedSerieToEdit}
+          /> */}
         </DialogContent>
 
         <DialogActions>
@@ -268,11 +246,11 @@ export const SeriesFormModal = ({
             type="submit"
             variant="contained"
             color="primary"
-            disabled={loading}
+            disabled={isLoading}
           >
-            {loading
+            {isLoading
               ? "Saving..."
-              : selectedSerie
+              : selectedSerieToEdit
               ? "Save Changes"
               : "Add Serie"}
           </Button>

@@ -12,9 +12,9 @@ export const seriesApi = createApi({
         try {
           const { data, error } = await supabase.from("SERIES").select("*");
           if (error) throw error;
-          return { data, error };
+          return { data };
         } catch (error) {
-          return { data: null, error: error.message };
+          return { error: { message: error.message } };
         }
       },
       providesTags: ["Series"], // Proporciona la etiqueta 'Series'
@@ -29,9 +29,49 @@ export const seriesApi = createApi({
           console.log({ data, error });
 
           if (error) throw error;
-          return { data, error };
+          return { data };
         } catch (error) {
-          return { data: null, error: error.message };
+          return { error: { message: error.message } };
+        }
+      },
+      invalidatesTags: ["Series"], // Invalida la etiqueta 'Series'
+    }),
+
+    updateSerie: builder.mutation({
+      queryFn: async ({ id, ...updatedSerie }) => {
+        try {
+          const { data, error } = await supabase
+            .from("SERIES")
+            .update(updatedSerie)
+            .eq("id", id)
+            .select();
+
+          console.log({ data, error });
+
+          if (error) throw error;
+
+          return { data };
+        } catch (error) {
+          return { error: { message: error.message } };
+        }
+      },
+      invalidatesTags: ["Series"], // Invalida la etiqueta 'Series'
+    }),
+
+    deleteSerie: builder.mutation({
+      queryFn: async (id) => {
+        try {
+          const { data, error } = await supabase
+            .from("SERIES")
+            .delete()
+            .eq("id", id)
+            .select();
+          console.log({ data, error });
+
+          if (error) throw error;
+          return { data };
+        } catch (error) {
+          return { error: { message: error.message } };
         }
       },
       invalidatesTags: ["Series"], // Invalida la etiqueta 'Series'
@@ -39,4 +79,9 @@ export const seriesApi = createApi({
   }),
 });
 
-export const { useFetchSeriesQuery, useAddSerieMutation } = seriesApi;
+export const {
+  useFetchSeriesQuery,
+  useAddSerieMutation,
+  useUpdateSerieMutation,
+  useDeleteSerieMutation,
+} = seriesApi;

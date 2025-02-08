@@ -9,10 +9,19 @@ import SerieFilters from "../components/SerieFilters";
 import AddButton from "../components/AddButton";
 import SeriesList from "../components/SeriesList";
 
-import { useSeriesData } from "../hooks/useSeriesData";
+import { useDeleteSerie, useSeriesData } from "../hooks/useSeriesData";
 import { Loading } from "../components/Loading";
 import { supabase } from "../../config/supabaseClient";
 import { SeriesFormModal } from "../components/SeriesFormModal";
+import { useEffect } from "react";
+import {
+  useAddSerieMutation,
+  useDeleteSerieMutation,
+  useFetchSeriesQuery,
+  useUpdateSerieMutation,
+} from "../../services/seriesApi";
+import { SubmitLoading } from "../components/SubmitLoading";
+import { deleteImageFromStorage } from "../utils/imageUtils";
 
 // const initialSeries = [
 //   {
@@ -45,39 +54,82 @@ import { SeriesFormModal } from "../components/SeriesFormModal";
 export default function SeriesPage() {
   // const [series, setSeries] = useState(initialSeries);
   const [openModal, setOpenModal] = useState(false); //Modal para añadir o editar en formulario
-  const [selectedSerie, setSelectedSerie] = useState(null); //Serie actual para editar
+  const [selectedSerieToEdit, setSelectedSerie] = useState(null); //Serie actual para editar
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  // Obtener las mutaciones de add y edit con sus estados
+  const [
+    addSerie,
+    { isLoading: isAdding, isSuccess: isAddSuccess, error: addError },
+  ] = useAddSerieMutation();
+  const [
+    updateSerie,
+    { isLoading: isUpdating, isSuccess: isUpdateSuccess, error: updateError },
+  ] = useUpdateSerieMutation();
+
+  const [
+    deleteSerie,
+    { isLoading: isDeleting, isSuccess: isDeleteSuccess, error: deleteError },
+  ] = useDeleteSerieMutation();
+
+  // Estados combinados para SubmitLoading
+  const isLoading = isAdding || isUpdating || isDeleting;
+  const isSuccess = isAddSuccess || isUpdateSuccess || isDeleteSuccess;
+  const errorMessage =
+    addError?.message || updateError?.message || deleteError?.message;
+
+  // Función para manejar el submit del formulario
+  const handleSubmitSerie = async (newSerie, isEdit) => {
+    try {
+      if (isEdit) {
+        await updateSerie(newSerie).unwrap();
+      } else {
+        await addSerie(newSerie).unwrap();
+      }
+      setSnackbarOpen(true); // Mostrar el mensaje de éxito
+      handleCloseModal(); // Cerrar el modal
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
 
   const {
     data: seriesData,
     error: errorSeriesData,
     isLoading: isLoadingSeriesData,
     isError: isErrorSeriesData,
-  } = useSeriesData();
+  } = useFetchSeriesQuery();
 
-  //Cada vez que da click en añadir o editar
-  const handleOpenModal = useCallback((serieData = null) => {
-    setSelectedSerie(serieData); //Si recibe la data de la serie se tendra la serie actual
-    console.log(serieData);
-    setOpenModal(true); //Se establece el modal abierto o true
-    console.log("HANDLE OPEN MODAL");
+  const handleOpenAddModal = useCallback(() => {
+    setSelectedSerie(null);
+    setOpenModal(true);
+    console.log("handle open add serie", selectedSerieToEdit);
+  }, []);
+
+  const handleOpenEditModal = useCallback((serieData) => {
+    setSelectedSerie(serieData);
+    setOpenModal(true);
   }, []);
 
   //Cuando se cierra el modal
   const handleCloseModal = useCallback(() => {
-    setSelectedSerie(null); // Seria actual se limpia
     setOpenModal(false); //Se establece el modal cerrado o false
-    console.log("HANDLE CLOSE MODAL");
+    console.log("HANDLE CLOSE MODAL", selectedSerieToEdit);
   }, []);
 
-  const handleDeleteSeries = async (id) => {
+  const handleDeleteSerie = async (serie) => {
+    const { id } = serie;
+    // Eliminar imágenes asociadas
+    if (serie.cover_image) {
+      await deleteImageFromStorage(serie?.cover_image);
+    }
+    if (serie.banner_image) {
+      await deleteImageFromStorage(serie?.banner_image);
+    }
+
     try {
-      const { error } = await supabase.from("series").delete().eq("id", id);
-
-      if (error) throw error;
-
-      // Actualizar datos después de eliminar
-      // const updatedSeries = seriesData.filter(serie => serie.id !== id);
-      // setSeries(updatedSeries); // Si usas estado local
+      await deleteSerie(id).unwrap();
+      console.log("Eliminado serie con id:", id);
     } catch (error) {
       console.error("Error eliminando serie:", error);
     }
@@ -88,31 +140,41 @@ export default function SeriesPage() {
 
   console.log(seriesData);
 
+  // useEffect(() => {
+  //   console.log("Effect Cambio select serie : ", selectedSerieToEdit);
+  // }, [selectedSerieToEdit]);
+
   return (
     <>
       <BreadcrumbsComponent></BreadcrumbsComponent>
       <Box>
         <SerieFilters />
-
         {/* BOTON PARA AGREGAR SERIE */}
         {/* Manejador para abir el modal en el caso de añadir serie */}
-        <AddButton handleOpenModal={handleOpenModal}></AddButton>
-
+        <AddButton handleOpenAddModal={handleOpenAddModal}></AddButton>
         {/* LISTA - GRID DE SERIES */}
-
         <SeriesList
           series={seriesData} //Lista de series
-          handleDeleteSeries={handleDeleteSeries} // Manejador para eliminar una serie
-          handleOpenModal={handleOpenModal} // Manejador para abrir el modal en caso de editar serie
+          handleDeleteElement={handleDeleteSerie} // Manejador para eliminar una serie
+          handleOpenEditModal={handleOpenEditModal} // Manejador para abrir el modal en caso de editar serie
         ></SeriesList>
-
         {/* DIALOG - FORMULARIO PARA AGREGAR O EDITAR UNA SERIE */}
-
         <SeriesFormModal
           handleCloseModal={handleCloseModal} //Manejador para cerrar el modal
           openModal={openModal} //Estado del modal
-          selectedSerie={selectedSerie} //Enviar la serie actual
+          selectedSerieToEdit={selectedSerieToEdit} //Enviar la serie actual
+          onSubmit={handleSubmitSerie} // Función para add/edit
+          isLoading={isLoading} // Estado de carga
         ></SeriesFormModal>
+
+        <SubmitLoading
+          open={snackbarOpen}
+          onClose={() => setSnackbarOpen(false)}
+          isSubmitting={isLoading}
+          success={isSuccess}
+          errorMessage={errorMessage}
+          isEditing={!!selectedSerieToEdit}
+        />
       </Box>
     </>
   );

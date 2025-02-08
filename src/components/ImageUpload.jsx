@@ -6,7 +6,7 @@ export const ImageUpload = ({
   message,
   currentImage,
   onImageChange,
-  loading,
+  isAddingSerie,
 }) => {
   const fileInputRef = useRef(null);
 
@@ -37,7 +37,7 @@ export const ImageUpload = ({
       <Button
         component="label"
         variant="contained"
-        disabled={loading}
+        disabled={isAddingSerie}
         startIcon={<FileUploadIcon />}
       >
         {`Upload ${message}`}

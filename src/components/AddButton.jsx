@@ -2,7 +2,7 @@ import { Box, Button, Typography } from "@mui/material";
 import React from "react";
 import AddIcon from "@mui/icons-material/Add";
 
-const AddButton = ({ handleOpenModal }) => {
+const AddButton = ({ handleOpenAddModal }) => {
   return (
     <Box
       sx={{
@@ -18,7 +18,7 @@ const AddButton = ({ handleOpenModal }) => {
       <Button
         variant="contained"
         sx={{ bgcolor: "primary.main", color: "white" }}
-        onClick={() => handleOpenModal()}
+        onClick={() => handleOpenAddModal()}
       >
         <AddIcon /> Add Series
       </Button>

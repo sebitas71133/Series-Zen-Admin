@@ -1,4 +1,4 @@
-import { Alert, LinearProgress, Snackbar } from "@mui/material";
+import { Alert, LinearProgress, Slide, Snackbar } from "@mui/material";
 import React from "react";
 
 export const SubmitLoading = ({
@@ -16,14 +16,15 @@ export const SubmitLoading = ({
         open={open}
         autoHideDuration={3000}
         onClose={onClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        TransitionComponent={Slide}
       >
         {errorMessage ? (
-          <Alert onClose={onClose} severity="error">
+          <Alert onClose={onClose} severity="error" sx={{ width: "100%" }}>
             {errorMessage}
           </Alert>
         ) : success ? (
-          <Alert onClose={onClose} severity="success">
+          <Alert onClose={onClose} severity="success" sx={{ width: "100%" }}>
             {isEditing
               ? "Serie actualizada exitosamente"
               : "Serie creada exitosamente"}
