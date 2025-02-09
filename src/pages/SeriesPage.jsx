@@ -1,4 +1,12 @@
-import { Box } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from "@mui/material";
 
 import { useCallback, useState } from "react";
 
@@ -9,11 +17,10 @@ import SerieFilters from "../components/SerieFilters";
 import AddButton from "../components/AddButton";
 import SeriesList from "../components/SeriesList";
 
-import { useDeleteSerie, useSeriesData } from "../hooks/useSeriesData";
 import { Loading } from "../components/Loading";
-import { supabase } from "../../config/supabaseClient";
+
 import { SeriesFormModal } from "../components/SeriesFormModal";
-import { useEffect } from "react";
+
 import {
   useAddSerieMutation,
   useDeleteSerieMutation,
@@ -23,39 +30,23 @@ import {
 import { SubmitLoading } from "../components/SubmitLoading";
 import { deleteImageFromStorage } from "../utils/imageUtils";
 
-// const initialSeries = [
-//   {
-//     id: 1,
-//     title: "Samurai Jack",
-//     cover_image:
-//       "https://monlmedsqyxwyanwrhlp.supabase.co/storage/v1/object/public/SeriesZenMedia/SERIES/SAMURAI-JACK/SERIE/Series_Samurai_Jack_q7ax9j.jpg",
-//     banner_image:
-//       "https://monlmedsqyxwyanwrhlp.supabase.co/storage/v1/object/public/SeriesZenMedia/SERIES/SAMURAI-JACK/SERIE/Samuria-banner_iomi3u.avif",
-//     description:
-//       "Cuando una fuerza maligna destruye la Tierra, un joven guerrero samurái viaja al futuro. Los nativos lo ayudan a volver al pasado para prevenirlo.",
-//     release_year: 2002,
-//     rating: 8.5,
-//     slug: "samurai-jack",
-//   },
-//   {
-//     id: 2,
-//     title: "Primal",
-//     cover_image:
-//       "https://monlmedsqyxwyanwrhlp.supabase.co/storage/v1/object/public/SeriesZenMedia/SERIES/PRIMAL/SERIE/primal_cover_image_bcl0af.jpg",
-//     banner_image:
-//       "https://monlmedsqyxwyanwrhlp.supabase.co/storage/v1/object/public/SeriesZenMedia/SERIES/PRIMAL/SERIE/primal_banner_image_isbuwd.jpg",
-//     description:
-//       "La historia de un cavernícola a punto de evolucionar y un dinosaurio al borde de la extinción. En la tragedia, su amistad se convierte en la esperanza para sobrevivir en un mundo violento y primitivo.",
-//     release_year: 2019,
-//     rating: 8.7,
-//     slug: "primal",
-//   },
-// ];
 export default function SeriesPage() {
   // const [series, setSeries] = useState(initialSeries);
   const [openModal, setOpenModal] = useState(false); //Modal para añadir o editar en formulario
   const [selectedSerieToEdit, setSelectedSerie] = useState(null); //Serie actual para editar
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [openConfirmDelete, setOpenConfirmDelete] = useState(false); //Modal para confirmar eliminación
+  const [selectedSerieToDelete, setSelectedSerieToDelete] = useState(null); //Serie actual para eliminar
+
+  const handleOpenConfirmDelete = (serie) => {
+    setSelectedSerieToDelete(serie);
+    setOpenConfirmDelete(true);
+  };
+
+  const handleCloseConfirmDelete = () => {
+    setSelectedSerieToDelete(null);
+    setOpenConfirmDelete(false);
+  };
 
   // Obtener las mutaciones de add y edit con sus estados
   const [
@@ -103,7 +94,6 @@ export default function SeriesPage() {
   const handleOpenAddModal = useCallback(() => {
     setSelectedSerie(null);
     setOpenModal(true);
-    console.log("handle open add serie", selectedSerieToEdit);
   }, []);
 
   const handleOpenEditModal = useCallback((serieData) => {
@@ -114,17 +104,18 @@ export default function SeriesPage() {
   //Cuando se cierra el modal
   const handleCloseModal = useCallback(() => {
     setOpenModal(false); //Se establece el modal cerrado o false
-    console.log("HANDLE CLOSE MODAL", selectedSerieToEdit);
   }, []);
 
-  const handleDeleteSerie = async (serie) => {
-    const { id } = serie;
+  const handleDeleteSerie = async () => {
+    if (!selectedSerieToDelete) return;
+
+    const { id, cover_image, banner_image } = selectedSerieToDelete;
     // Eliminar imágenes asociadas
-    if (serie.cover_image) {
-      await deleteImageFromStorage(serie?.cover_image);
+    if (cover_image) {
+      await deleteImageFromStorage(cover_image);
     }
-    if (serie.banner_image) {
-      await deleteImageFromStorage(serie?.banner_image);
+    if (banner_image) {
+      await deleteImageFromStorage(banner_image);
     }
 
     try {
@@ -133,16 +124,13 @@ export default function SeriesPage() {
     } catch (error) {
       console.error("Error eliminando serie:", error);
     }
+    handleCloseConfirmDelete();
   };
 
   if (isLoadingSeriesData) return <Loading />;
   if (isErrorSeriesData) return <div>{errorSeriesData}</div>;
 
   console.log(seriesData);
-
-  // useEffect(() => {
-  //   console.log("Effect Cambio select serie : ", selectedSerieToEdit);
-  // }, [selectedSerieToEdit]);
 
   return (
     <>
@@ -155,7 +143,7 @@ export default function SeriesPage() {
         {/* LISTA - GRID DE SERIES */}
         <SeriesList
           series={seriesData} //Lista de series
-          handleDeleteElement={handleDeleteSerie} // Manejador para eliminar una serie
+          handleDeleteElement={handleOpenConfirmDelete} // Manejador para eliminar una serie
           handleOpenEditModal={handleOpenEditModal} // Manejador para abrir el modal en caso de editar serie
         ></SeriesList>
         {/* DIALOG - FORMULARIO PARA AGREGAR O EDITAR UNA SERIE */}
@@ -175,6 +163,30 @@ export default function SeriesPage() {
           errorMessage={errorMessage}
           isEditing={!!selectedSerieToEdit}
         />
+        <Dialog
+          open={openConfirmDelete}
+          onClose={handleCloseConfirmDelete}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            {"Confirmar elimincaciòn"}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              ¿Estás seguro de que deseas eliminar la serie? Esta acción no se
+              puede deshacer.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseConfirmDelete} color="primary">
+              Cancelar
+            </Button>
+            <Button onClick={handleDeleteSerie} color="error" autoFocus>
+              Eliminar
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </>
   );

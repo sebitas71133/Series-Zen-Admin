@@ -69,6 +69,7 @@ export const ImageUpload = ({
             onClick={handleRemove}
             color="error"
             size="small"
+            variant="outlined"
             sx={{ mt: 1 }}
           >
             Remove

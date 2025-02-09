@@ -15,7 +15,10 @@ import { ImageUpload } from "./ImageUpload";
 import { SubmitLoading } from "./SubmitLoading";
 import { AddCircleOutline, Edit } from "@mui/icons-material";
 
-import { uploadImageToStorage } from "../utils/imageUtils";
+import {
+  deleteImageFromStorage,
+  uploadImageToStorage,
+} from "../utils/imageUtils";
 
 export const SeriesFormModal = ({
   handleCloseModal,
@@ -32,8 +35,18 @@ export const SeriesFormModal = ({
     formState: { errors },
   } = useForm();
 
-  const [coverImage, setCoverImage] = useState({ file: null, url: "" });
-  const [bannerImage, setBannerImage] = useState({ file: null, url: "" });
+  //File es el objeto que el usuario selecciona desde su computadora
+  // url temporal generada con URL.createObjectURL para mostrar la imagen antes de subirla a supabase
+  const [coverImage, setCoverImage] = useState({
+    file: null,
+    url: "",
+    isDeleted: false,
+  });
+  const [bannerImage, setBannerImage] = useState({
+    file: null,
+    url: "",
+    isDeleted: false,
+  });
 
   useEffect(() => {
     if (selectedSerieToEdit) {
@@ -75,6 +88,17 @@ export const SeriesFormModal = ({
 
       let coverUrl = coverImage.url;
       let bannerUrl = bannerImage.url;
+
+      // Eliminar imágenes si fueron marcadas como eliminadas
+      if (coverImage.isDeleted && selectedSerieToEdit?.cover_image) {
+        await deleteImageFromStorage(selectedSerieToEdit.cover_image);
+        coverUrl = ""; // Vaciar la URL en la BD
+      }
+
+      if (bannerImage.isDeleted && selectedSerieToEdit?.banner_image) {
+        await deleteImageFromStorage(selectedSerieToEdit.banner_image);
+        bannerUrl = ""; // Vaciar la URL en la BD
+      }
 
       // Subir nuevas imágenes si existen
       if (coverImage.file) {
@@ -209,6 +233,7 @@ export const SeriesFormModal = ({
                   setCoverImage({
                     file,
                     url: file ? URL.createObjectURL(file) : "",
+                    isDeleted: !file,
                   })
                 }
                 isAddingSerie={isLoading}
@@ -223,6 +248,7 @@ export const SeriesFormModal = ({
                   setBannerImage({
                     file,
                     url: file ? URL.createObjectURL(file) : "",
+                    isDeleted: !file,
                   })
                 }
                 isAddingSerie={isLoading}
