@@ -11,20 +11,26 @@ import StarRateIcon from "@mui/icons-material/StarRate";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-export const SerieCard = ({
-  data: serie,
+export const TemporadaCard = ({
+  data: temporada,
   handleOpenEditModal,
-  handleDeleteElement: handleDeleteSerie,
+  handleDeleteElement: handleConfirmDeleteTemporada,
 }) => {
+  const { slug } = useParams();
   const navigate = useNavigate();
-  const handleViewSeasons = () => {
+  const handleViewEpisodes = () => {
     // navigate(`/admin/series/${serie.slug}/temporadas`);
-    navigate(`/admin/series/${serie.slug}/temporadas`, {
-      state: { seriesId: serie.id, slug: serie.slug },
-    });
+    navigate(
+      `/admin/series/${slug}/temporadas/${temporada.season_number}/episodios`,
+      {
+        state: { temporadaId: temporada.id },
+      }
+    );
   };
+
+  console.log(temporada);
 
   return (
     <Grid2 size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
@@ -39,13 +45,13 @@ export const SerieCard = ({
         <CardMedia
           component="img"
           height="200"
-          image={serie.cover_image}
-          alt={serie.title}
+          image={temporada.poster_image}
+          alt={temporada.season_number}
           sx={{ objectFit: "cover" }}
         />
         <CardContent sx={{ flexGrow: 1 }}>
           <Typography gutterBottom variant="h6" component="div">
-            {serie.title}
+            {temporada.season_number}
           </Typography>
           <Typography
             variant="body2"
@@ -61,7 +67,7 @@ export const SerieCard = ({
               WebkitBoxOrient: "vertical",
             }}
           >
-            {serie.description}
+            {temporada.description}
           </Typography>
           <Box
             sx={{
@@ -81,15 +87,15 @@ export const SerieCard = ({
                 borderRadius: 1,
               }}
             >
-              {serie.release_year}
+              {temporada.release_year}
             </Typography>
-            <Typography
+            {/* <Typography
               variant="body2"
               sx={{ display: "flex", alignItems: "center", gap: 1 }}
             >
               <StarRateIcon color="warning" />
               <Box component={"span"}>{serie.rating?.toFixed(1)}</Box>
-            </Typography>
+            </Typography> */}
           </Box>
           <Box
             sx={{
@@ -98,20 +104,24 @@ export const SerieCard = ({
               mt: 2,
             }}
           >
-            <Button onClick={handleViewSeasons} size="small" variant="outlined">
-              View Seasons
+            <Button
+              onClick={handleViewEpisodes}
+              size="small"
+              variant="outlined"
+            >
+              View Episodes
             </Button>
             <Button
               color="primary"
               size="small"
-              onClick={() => handleOpenEditModal(serie)}
+              onClick={() => handleOpenEditModal(temporada)}
             >
               <EditIcon /> Edit
             </Button>
             <Button
               size="small"
               color="error"
-              onClick={() => handleDeleteSerie(serie)}
+              onClick={() => handleConfirmDeleteTemporada(temporada)}
             >
               <DeleteIcon /> Delete
             </Button>

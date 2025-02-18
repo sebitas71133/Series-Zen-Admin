@@ -8,6 +8,9 @@ import HomePage from "../src/pages/HomePage";
 import PublicLayout from "../src/layout/PublicLayout";
 import LoginPage from "../src/pages/LoginPage";
 import ProtectedLayout from "../src/layout/ProtectedLayout";
+import SeriesPage from "../src/pages/SeriesPage";
+import { TemporadasPage } from "../src/pages/TemporadasPage";
+import { EpisodePage } from "../src/pages/EpisodePage";
 
 const routes = [
   //RUTAS PUBLICAS
@@ -22,12 +25,22 @@ const routes = [
   },
   //RUTAS PRIVADA
   {
-    path: "/app",
-    element: <ProtectedLayout />,
+    path: "/admin",
+    element: <ProtectedLayout />, // Se renderiza primero
     children: [
-      { path: "series", element: <AdminLayout></AdminLayout> },
-      //   { path: "series/:slug", element: <SeriesPage></SeriesPage> },
-      //   { path: "profile", element: <Account></Account> },
+      {
+        path: "",
+        element: <AdminLayout></AdminLayout>,
+        children: [
+          { index: true, element: <SeriesPage /> }, // Se carga em `/admin`
+          { path: "series", element: <SeriesPage /> }, //Se carga en `/admin/series`
+          { path: "series/:slug/temporadas", element: <TemporadasPage /> },
+          {
+            path: "series/:slug/temporadas/:season_number/episodios",
+            element: <EpisodePage />,
+          },
+        ],
+      },
     ],
   },
   {

@@ -1,7 +1,8 @@
 import * as React from "react";
 import { styled } from "@mui/material/styles";
 
-import SeriesPage from "../../pages/SeriesPage";
+import { Outlet } from "react-router-dom";
+import BreadcrumbsComponent from "./BreadcrumbsComponent";
 
 const drawerWidth = 240;
 
@@ -43,7 +44,8 @@ const MainComponent = (props) => {
   return (
     <Main open={open}>
       <DrawerHeader />
-      <SeriesPage />
+      <BreadcrumbsComponent></BreadcrumbsComponent>
+      <Outlet />
     </Main>
   );
 };

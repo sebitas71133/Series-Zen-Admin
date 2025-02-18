@@ -15,7 +15,7 @@ const PublicLayout = () => {
   }
 
   if (session) {
-    return <Navigate to="/app/series" replace />;
+    return <Navigate to="/admin/series" replace />;
   }
 
   return (

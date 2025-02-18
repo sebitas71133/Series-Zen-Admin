@@ -8,9 +8,7 @@ import {
   DialogTitle,
 } from "@mui/material";
 
-import { useCallback, useState } from "react";
-
-import BreadcrumbsComponent from "../layout/components/BreadcrumbsComponent";
+import { useCallback, useEffect, useState } from "react";
 
 import SerieFilters from "../components/SerieFilters";
 
@@ -29,67 +27,72 @@ import {
 } from "../../services/seriesApi";
 import { SubmitLoading } from "../components/SubmitLoading";
 import { deleteImageFromStorage } from "../utils/imageUtils";
+import { deleteSeriesWithImages } from "../utils/deleteElementWithImages";
+
+import { ItemsList } from "../components/common/ItemsList";
+import { SerieCard } from "../components/SerieCard";
 
 export default function SeriesPage() {
   // const [series, setSeries] = useState(initialSeries);
   const [openModal, setOpenModal] = useState(false); //Modal para añadir o editar en formulario
   const [selectedSerieToEdit, setSelectedSerie] = useState(null); //Serie actual para editar
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [openConfirmDelete, setOpenConfirmDelete] = useState(false); //Modal para confirmar eliminación
-  const [selectedSerieToDelete, setSelectedSerieToDelete] = useState(null); //Serie actual para eliminar
+  // Estado para almacenar la serie seleccionada para eliminar
+  const [selectedSerieToDelete, setSelectedSerieToDelete] = useState(null);
+  //Estado para controlar la visibilidad del diálogo de confirmación
+  const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
 
-  const handleOpenConfirmDelete = (serie) => {
-    setSelectedSerieToDelete(serie);
-    setOpenConfirmDelete(true);
-  };
-
-  const handleCloseConfirmDelete = () => {
-    setSelectedSerieToDelete(null);
-    setOpenConfirmDelete(false);
-  };
+  const [errorMessage, setErrorMessage] = useState(null);
 
   // Obtener las mutaciones de add y edit con sus estados
+
+  const {
+    data: seriesData,
+    isSuccess: isSuccessSeriesData,
+    isLoading: isLoadingSeriesData,
+    isError: isErrorSeriesData,
+  } = useFetchSeriesQuery();
+
   const [
     addSerie,
-    { isLoading: isAdding, isSuccess: isAddSuccess, error: addError },
+    { isLoading: isAdding, isSuccess: isAddSuccess, isError: addError },
   ] = useAddSerieMutation();
   const [
     updateSerie,
-    { isLoading: isUpdating, isSuccess: isUpdateSuccess, error: updateError },
+    { isLoading: isUpdating, isSuccess: isUpdateSuccess, isError: updateError },
   ] = useUpdateSerieMutation();
 
   const [
     deleteSerie,
-    { isLoading: isDeleting, isSuccess: isDeleteSuccess, error: deleteError },
+    { isLoading: isDeleting, isSuccess: isDeleteSuccess, isError: deleteError },
   ] = useDeleteSerieMutation();
 
   // Estados combinados para SubmitLoading
   const isLoading = isAdding || isUpdating || isDeleting;
-  const isSuccess = isAddSuccess || isUpdateSuccess || isDeleteSuccess;
-  const errorMessage =
-    addError?.message || updateError?.message || deleteError?.message;
 
-  // Función para manejar el submit del formulario
+  useEffect(() => {
+    if (isDeleteSuccess || isAddSuccess || isUpdateSuccess) {
+      setSnackbarOpen(true);
+    }
+  }, [isDeleteSuccess, isAddSuccess, isUpdateSuccess]);
+
+  /*********************** SUBIR SERIE ***************************/
+
   const handleSubmitSerie = async (newSerie, isEdit) => {
+    setErrorMessage(null);
     try {
       if (isEdit) {
         await updateSerie(newSerie).unwrap();
       } else {
         await addSerie(newSerie).unwrap();
       }
-      setSnackbarOpen(true); // Mostrar el mensaje de éxito
+
       handleCloseModal(); // Cerrar el modal
     } catch (error) {
+      setErrorMessage(error.message);
       console.error("Error:", error);
     }
   };
-
-  const {
-    data: seriesData,
-    error: errorSeriesData,
-    isLoading: isLoadingSeriesData,
-    isError: isErrorSeriesData,
-  } = useFetchSeriesQuery();
 
   const handleOpenAddModal = useCallback(() => {
     setSelectedSerie(null);
@@ -106,46 +109,93 @@ export default function SeriesPage() {
     setOpenModal(false); //Se establece el modal cerrado o false
   }, []);
 
-  const handleDeleteSerie = async () => {
-    if (!selectedSerieToDelete) return;
+  /************************ PROCESO DE ELIMINACION ************************/
 
+  /**
+   * Abre el cuadro de diálogo de confirmación para eliminar una serie
+   * Objeto de la serie a eliminar
+   */
+  const handleOpenDeleteConfirmation = (serie) => {
+    setSelectedSerieToDelete(serie);
+    setOpenConfirmDelete(true);
+  };
+
+  /**
+   * Cierra el cuadro de diálogo de confirmación
+   *Se establece la serie seleccionada para eliminar en null
+   */
+  const handleCloseDeleteConfirmation = () => {
+    setSelectedSerieToDelete(null);
+    setOpenConfirmDelete(false);
+  };
+
+  /**
+   * Confirmar la eliminacion de una serie
+   * Si la serie seleccionada para eliminar no existe, salir
+   * Se obtiene el id y las imágenes de la serie seleccionada(si existen)
+   * Se eliminan las imágenes asociadas si existen
+   * Se elimina la serie de la base de datos
+   * Si ocurre un error, se muestra en la consola
+   * Cierra el cuadro de diálogo de confirmación
+   * @returns
+   */
+
+  const handleConfirmDeleteSerie = async () => {
+    if (!selectedSerieToDelete) return;
+    setErrorMessage(null);
     const { id, cover_image, banner_image } = selectedSerieToDelete;
-    // Eliminar imágenes asociadas
-    if (cover_image) {
-      await deleteImageFromStorage(cover_image);
-    }
-    if (banner_image) {
-      await deleteImageFromStorage(banner_image);
-    }
+
+    //Eliminar todas las imagenes de sus temporadas tambien
+    await deleteSeriesWithImages(id);
+
+    // 🔹 2. Eliminar imágenes de portada y banner en paralelo
+    const deleteCover = cover_image
+      ? deleteImageFromStorage(cover_image)
+      : null;
+    const deleteBanner = banner_image
+      ? deleteImageFromStorage(banner_image)
+      : null;
+
+    await Promise.all([deleteCover, deleteBanner].filter(Boolean));
 
     try {
       await deleteSerie(id).unwrap();
       console.log("Eliminado serie con id:", id);
     } catch (error) {
       console.error("Error eliminando serie:", error);
+    } finally {
+      setSnackbarOpen(true);
+      handleCloseDeleteConfirmation();
     }
-    handleCloseConfirmDelete();
   };
 
   if (isLoadingSeriesData) return <Loading />;
-  if (isErrorSeriesData) return <div>{errorSeriesData}</div>;
+  // if (isErrorSeriesData) return <div>{errorSeriesData}</div>;
 
   console.log(seriesData);
 
   return (
     <>
-      <BreadcrumbsComponent></BreadcrumbsComponent>
       <Box>
         <SerieFilters />
         {/* BOTON PARA AGREGAR SERIE */}
         {/* Manejador para abir el modal en el caso de añadir serie */}
-        <AddButton handleOpenAddModal={handleOpenAddModal}></AddButton>
+        <AddButton
+          handleOpenAddModal={handleOpenAddModal}
+          message={"Add Series"}
+        ></AddButton>
         {/* LISTA - GRID DE SERIES */}
-        <SeriesList
+        {/* <SeriesList
           series={seriesData} //Lista de series
-          handleDeleteElement={handleOpenConfirmDelete} // Manejador para eliminar una serie
+          handleDeleteElement={handleOpenDeleteConfirmation} // Manejador para eliminar una serie
           handleOpenEditModal={handleOpenEditModal} // Manejador para abrir el modal en caso de editar serie
-        ></SeriesList>
+        ></SeriesList> */}
+        <ItemsList
+          items={seriesData}
+          CardComponent={SerieCard}
+          handleOpenEditModal={handleOpenEditModal}
+          handleDeleteElement={handleOpenDeleteConfirmation}
+        />
         {/* DIALOG - FORMULARIO PARA AGREGAR O EDITAR UNA SERIE */}
         <SeriesFormModal
           handleCloseModal={handleCloseModal} //Manejador para cerrar el modal
@@ -158,14 +208,15 @@ export default function SeriesPage() {
         <SubmitLoading
           open={snackbarOpen}
           onClose={() => setSnackbarOpen(false)}
-          isSubmitting={isLoading}
-          success={isSuccess}
+          isSubmitting={isAdding || isDeleting || isUpdating}
+          success={isAddSuccess || isDeleteSuccess || isUpdateSuccess}
           errorMessage={errorMessage}
           isEditing={!!selectedSerieToEdit}
+          isDeleteSuccess={isDeleteSuccess}
         />
         <Dialog
           open={openConfirmDelete}
-          onClose={handleCloseConfirmDelete}
+          onClose={handleCloseDeleteConfirmation}
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
         >
@@ -179,10 +230,10 @@ export default function SeriesPage() {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleCloseConfirmDelete} color="primary">
+            <Button onClick={handleCloseDeleteConfirmation} color="primary">
               Cancelar
             </Button>
-            <Button onClick={handleDeleteSerie} color="error" autoFocus>
+            <Button onClick={handleConfirmDeleteSerie} color="error" autoFocus>
               Eliminar
             </Button>
           </DialogActions>

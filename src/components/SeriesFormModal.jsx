@@ -19,6 +19,8 @@ import {
   deleteImageFromStorage,
   uploadImageToStorage,
 } from "../utils/imageUtils";
+import { useImageUpload } from "../hooks/useImageUpload";
+import { cleanObject } from "../utils/cleanObject";
 
 export const SeriesFormModal = ({
   handleCloseModal,
@@ -35,18 +37,17 @@ export const SeriesFormModal = ({
     formState: { errors },
   } = useForm();
 
-  //File es el objeto que el usuario selecciona desde su computadora
-  // url temporal generada con URL.createObjectURL para mostrar la imagen antes de subirla a supabase
-  const [coverImage, setCoverImage] = useState({
-    file: null,
-    url: "",
-    isDeleted: false,
-  });
-  const [bannerImage, setBannerImage] = useState({
-    file: null,
-    url: "",
-    isDeleted: false,
-  });
+  const {
+    image: cover_image,
+    handleImageChange: handleCoverChange,
+    uploadImage: uploadCoverImage,
+  } = useImageUpload(selectedSerieToEdit?.cover_image, "covers");
+
+  const {
+    image: banner_image,
+    handleImageChange: handleBannerChange,
+    uploadImage: uploadBannerImage,
+  } = useImageUpload(selectedSerieToEdit?.banner_image, "banners");
 
   useEffect(() => {
     if (selectedSerieToEdit) {
@@ -55,76 +56,37 @@ export const SeriesFormModal = ({
       setValue("rating", selectedSerieToEdit.rating);
       setValue("slug", selectedSerieToEdit.slug);
       setValue("release_year", selectedSerieToEdit.release_year);
-      setCoverImage({ file: null, url: selectedSerieToEdit.cover_image });
-      setBannerImage({ file: null, url: selectedSerieToEdit.banner_image });
 
       console.log("seleccionado serie");
     } else {
       reset();
-      setCoverImage({ file: null, url: "" });
-      setBannerImage({ file: null, url: "" });
+      //handleBannerChange(null);
       console.log("serie no eleccionada serie");
     }
 
     console.log("effect", selectedSerieToEdit);
-  }, [selectedSerieToEdit, setValue]);
+  }, [selectedSerieToEdit, setValue, handleCloseModal]);
 
   const onSubmitForm = async (formData) => {
     console.log(formData);
 
     try {
       const cleanedData = {
-        title: formData.title, // Asegura que title no esté vacío
-        slug: formData.slug, // Asegura que slug no esté vacío
-        description: formData.description || "", // Convierte "" a null
-        // Solo envía rating si tiene valor, de lo contrario no lo incluyas
-        ...(formData.rating && { rating: parseFloat(formData.rating) }),
-        // Solo envía release_year si tiene valor, de lo contrario no lo incluyas
-        ...(formData.release_year && {
-          release_year: parseInt(formData.release_year),
-        }),
+        ...cleanObject(formData),
         ...(selectedSerieToEdit && { id: parseInt(selectedSerieToEdit.id) }),
       };
 
-      let coverUrl = coverImage.url;
-      let bannerUrl = bannerImage.url;
+      let { imageUrl: bannerUrl, error: bannerError } = await uploadBannerImage(
+        selectedSerieToEdit?.banner_image
+      );
+      if (bannerError) throw bannerError;
 
-      // Eliminar imágenes si fueron marcadas como eliminadas
-      if (coverImage.isDeleted && selectedSerieToEdit?.cover_image) {
-        await deleteImageFromStorage(selectedSerieToEdit.cover_image);
-        coverUrl = ""; // Vaciar la URL en la BD
-      }
+      let { imageUrl: coverUrl, error: coverError } = await uploadCoverImage(
+        selectedSerieToEdit?.cover_image
+      );
+      if (coverError) throw coverError;
 
-      if (bannerImage.isDeleted && selectedSerieToEdit?.banner_image) {
-        await deleteImageFromStorage(selectedSerieToEdit.banner_image);
-        bannerUrl = ""; // Vaciar la URL en la BD
-      }
-
-      // Subir nuevas imágenes si existen
-      if (coverImage.file) {
-        const { data: coverData, error: coverError } =
-          await uploadImageToStorage(
-            coverImage.file,
-            "covers",
-            selectedSerieToEdit?.cover_image
-          );
-        if (coverError) throw coverError;
-        coverUrl = coverData.publicUrl;
-      }
-
-      if (bannerImage.file) {
-        const { data: bannerData, error: bannerError } =
-          await uploadImageToStorage(
-            bannerImage.file,
-            "banners",
-            selectedSerieToEdit?.banner_image
-          );
-
-        if (bannerError) throw bannerError;
-        bannerUrl = bannerData.publicUrl;
-      }
-      console.log(bannerUrl);
-
+      // Subir imágenes a Supabase Storage
       // Crear objeto con los datos de la serie
       const newSerie = {
         ...cleanedData,
@@ -138,6 +100,9 @@ export const SeriesFormModal = ({
     } catch (error) {
       console.error("Error saving o editting series:", error);
       //setErrorMessage(error.message || "Error saving series");
+    } finally {
+      handleCoverChange(null);
+      handleBannerChange(null);
     }
   };
   return (
@@ -185,6 +150,7 @@ export const SeriesFormModal = ({
             margin="normal"
             type="number"
             inputProps={{ min: 0, max: 10, step: 0.1 }}
+            defaultValue={5}
             {...register("rating", {
               //required: "Rating is required",
               min: { value: 0, message: "Rating must be at least 0" },
@@ -228,14 +194,8 @@ export const SeriesFormModal = ({
             <Grid2 xs={12} sm={6}>
               <ImageUpload
                 message="Cover"
-                currentImage={coverImage.url}
-                onImageChange={(file) =>
-                  setCoverImage({
-                    file,
-                    url: file ? URL.createObjectURL(file) : "",
-                    isDeleted: !file,
-                  })
-                }
+                currentImage={cover_image.url}
+                onImageChange={handleCoverChange}
                 isAddingSerie={isLoading}
               />
             </Grid2>
@@ -243,14 +203,8 @@ export const SeriesFormModal = ({
             <Grid2 xs={12} sm={6}>
               <ImageUpload
                 message="Banner"
-                currentImage={bannerImage.url}
-                onImageChange={(file) =>
-                  setBannerImage({
-                    file,
-                    url: file ? URL.createObjectURL(file) : "",
-                    isDeleted: !file,
-                  })
-                }
+                currentImage={banner_image.url}
+                onImageChange={handleBannerChange}
                 isAddingSerie={isLoading}
               />
             </Grid2>

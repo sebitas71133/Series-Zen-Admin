@@ -7,27 +7,40 @@ export const SubmitLoading = ({
   isSubmitting,
   success,
   errorMessage,
-  isEditing, // Nueva prop para saber si estamos editando
+  isEditing,
+  isDeleteSuccess,
 }) => {
+  console.log({
+    open,
+    onClose,
+    isSubmitting,
+    success,
+    errorMessage,
+    isEditing,
+    isDeleteSuccess,
+  });
+
   return (
     <>
       {isSubmitting && <LinearProgress />}
       <Snackbar
         open={open}
-        autoHideDuration={3000}
+        autoHideDuration={5000}
         onClose={onClose}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         TransitionComponent={Slide}
       >
-        {errorMessage ? (
+        {!!errorMessage ? (
           <Alert onClose={onClose} severity="error" sx={{ width: "100%" }}>
             {errorMessage}
           </Alert>
         ) : success ? (
           <Alert onClose={onClose} severity="success" sx={{ width: "100%" }}>
             {isEditing
-              ? "Serie actualizada exitosamente"
-              : "Serie creada exitosamente"}
+              ? "Actualizado exitosamente"
+              : isDeleteSuccess
+              ? "Eliminado exitosamente"
+              : "Creado exitosamente"}
           </Alert>
         ) : null}
       </Snackbar>

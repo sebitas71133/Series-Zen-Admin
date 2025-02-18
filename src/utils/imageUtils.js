@@ -1,10 +1,15 @@
 import { supabase } from "../../config/supabaseClient";
 
-export const uploadImageToStorage = async (file, folder, oldImageUrl) => {
+export const uploadImageToStorage = async (file, folder) => {
   try {
-    if (oldImageUrl) {
-      deleteImageFromStorage(oldImageUrl);
-    }
+    // if (oldImageUrl) {
+    //   const { success, error } = await deleteImageFromStorage(oldImageUrl);
+    //   if (success) {
+    //     oldImageUrl = ""; // Solo limpiar si realmente se eliminó
+    //   } else {
+    //     console.error("⚠️ No se pudo eliminar la imagen antigua:", error);
+    //   }
+    // }
 
     const fileName = `${folder}/${Date.now()}_${file.name}`;
     const { error: uploadError } = await supabase.storage

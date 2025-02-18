@@ -1,34 +1,7 @@
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CardMedia,
-  Chip,
-  Grid2,
-  Typography,
-} from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { Grid2 } from "@mui/material";
 
 import React from "react";
 import { SerieCard } from "./SerieCard";
-
-const Icons = {
-  Dashboard: () => "📊",
-  Person: () => "👤",
-  Product: () => "🛍️",
-  Blog: () => "📝",
-  SignIn: () => "🔑",
-  Search: () => "🔍",
-  Language: () => "🌐",
-  Cart: () => "🛒",
-  Edit: () => "✏️",
-  Delete: () => "🗑️",
-  Add: () => "➕",
-  Close: () => "✖️",
-  Star: () => "⭐",
-};
 
 //Usamos memo para memorizar un componente funcional. Esto significa que el componente solo se renderizará si sus props cambian
 const SeriesList = React.memo(

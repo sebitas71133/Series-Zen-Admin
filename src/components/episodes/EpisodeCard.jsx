@@ -7,25 +7,17 @@ import {
   Grid2,
   Typography,
 } from "@mui/material";
-import StarRateIcon from "@mui/icons-material/StarRate";
+
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import YouTubeIcon from "@mui/icons-material/YouTube";
 import React from "react";
-import { useNavigate } from "react-router-dom";
 
-export const SerieCard = ({
-  data: serie,
+export const EpisodeCard = ({
+  data: episode,
   handleOpenEditModal,
-  handleDeleteElement: handleDeleteSerie,
+  handleDeleteElement: handleConfirmDeleteEpisode,
 }) => {
-  const navigate = useNavigate();
-  const handleViewSeasons = () => {
-    // navigate(`/admin/series/${serie.slug}/temporadas`);
-    navigate(`/admin/series/${serie.slug}/temporadas`, {
-      state: { seriesId: serie.id, slug: serie.slug },
-    });
-  };
-
   return (
     <Grid2 size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
       <Card
@@ -39,13 +31,13 @@ export const SerieCard = ({
         <CardMedia
           component="img"
           height="200"
-          image={serie.cover_image}
-          alt={serie.title}
+          image={episode.thumbnail_image}
+          alt={episode.title}
           sx={{ objectFit: "cover" }}
         />
         <CardContent sx={{ flexGrow: 1 }}>
           <Typography gutterBottom variant="h6" component="div">
-            {serie.title}
+            {`${episode.episode_number}. ${episode.title} `}
           </Typography>
           <Typography
             variant="body2"
@@ -61,7 +53,7 @@ export const SerieCard = ({
               WebkitBoxOrient: "vertical",
             }}
           >
-            {serie.description}
+            {episode.description}
           </Typography>
           <Box
             sx={{
@@ -81,14 +73,7 @@ export const SerieCard = ({
                 borderRadius: 1,
               }}
             >
-              {serie.release_year}
-            </Typography>
-            <Typography
-              variant="body2"
-              sx={{ display: "flex", alignItems: "center", gap: 1 }}
-            >
-              <StarRateIcon color="warning" />
-              <Box component={"span"}>{serie.rating?.toFixed(1)}</Box>
+              {episode.release_date}
             </Typography>
           </Box>
           <Box
@@ -98,20 +83,26 @@ export const SerieCard = ({
               mt: 2,
             }}
           >
-            <Button onClick={handleViewSeasons} size="small" variant="outlined">
-              View Seasons
-            </Button>
             <Button
               color="primary"
               size="small"
-              onClick={() => handleOpenEditModal(serie)}
+              onClick={() => handleOpenEditModal(episode)}
             >
               <EditIcon /> Edit
             </Button>
             <Button
+              onClick={() => window.open(episode.video_url, "_blank")}
+              size="small"
+              color="secondary"
+            >
+              <YouTubeIcon />
+              View
+            </Button>
+
+            <Button
               size="small"
               color="error"
-              onClick={() => handleDeleteSerie(serie)}
+              onClick={() => handleConfirmDeleteEpisode(episode)}
             >
               <DeleteIcon /> Delete
             </Button>

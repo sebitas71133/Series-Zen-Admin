@@ -1,10 +1,9 @@
 import * as React from "react";
-import { Box, InputBase, styled, useTheme, CssBaseline } from "@mui/material";
+import { Box, useTheme, CssBaseline } from "@mui/material";
 
 import AppBarComponent from "./components/AppBarComponent";
 import DrawerComponent from "./components/DrawerComponent";
 import MainComponent from "./components/MainComponent";
-import BreadcrumbsComponent from "./components/BreadcrumbsComponent";
 
 export const AdminLayout = ({ children }) => {
   const theme = useTheme();
