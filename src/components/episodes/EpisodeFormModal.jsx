@@ -8,12 +8,14 @@ import {
   Grid2,
   TextField,
   Typography,
+  IconButton,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { Controller, set, useForm } from "react-hook-form";
 
 import { AddCircleOutline, Edit } from "@mui/icons-material";
 import { ImageUpload } from "../ImageUpload";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 import { useImageUpload } from "../../hooks/useImageUpload";
 import { cleanObject } from "../../utils/cleanObject";
@@ -61,10 +63,7 @@ export const EpisodeFormModal = ({
       console.log("seleccionado episodio para editar");
     } else {
       reset();
-      console.log("episodio para no editar");
     }
-
-    console.log("effect", selectedEpisodeToEdit);
   }, [selectedEpisodeToEdit, setValue, handleCloseModal]);
 
   const onSubmitForm = async (formData) => {
@@ -118,9 +117,16 @@ export const EpisodeFormModal = ({
         <DialogTitle color="primary">
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {selectedEpisodeToEdit ? <Edit /> : <AddCircleOutline />}
-            <Typography variant="h6">
+            <Typography variant="h6" flexGrow={1}>
               {selectedEpisodeToEdit ? "Edit Episode" : "Add New Episode"}
             </Typography>
+            <IconButton
+              onClick={handleCloseModal}
+              color="error"
+              sx={{ ml: "auto" }}
+            >
+              <CancelIcon fontSize="large" />
+            </IconButton>
           </Box>
         </DialogTitle>
 

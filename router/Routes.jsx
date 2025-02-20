@@ -34,9 +34,9 @@ const routes = [
         children: [
           { index: true, element: <SeriesPage /> }, // Se carga em `/admin`
           { path: "series", element: <SeriesPage /> }, //Se carga en `/admin/series`
-          { path: "series/:slug/temporadas", element: <TemporadasPage /> },
+          { path: "series/:serieId/temporadas", element: <TemporadasPage /> },
           {
-            path: "series/:slug/temporadas/:season_number/episodios",
+            path: "series/:serieId/temporadas/:seasonId/episodios",
             element: <EpisodePage />,
           },
         ],

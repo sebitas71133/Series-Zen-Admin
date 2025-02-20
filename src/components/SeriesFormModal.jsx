@@ -8,12 +8,14 @@ import {
   Grid2,
   TextField,
   Typography,
+  IconButton,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ImageUpload } from "./ImageUpload";
 import { SubmitLoading } from "./SubmitLoading";
 import { AddCircleOutline, Edit } from "@mui/icons-material";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 import {
   deleteImageFromStorage,
@@ -63,8 +65,6 @@ export const SeriesFormModal = ({
       //handleBannerChange(null);
       console.log("serie no eleccionada serie");
     }
-
-    console.log("effect", selectedSerieToEdit);
   }, [selectedSerieToEdit, setValue, handleCloseModal]);
 
   const onSubmitForm = async (formData) => {
@@ -111,9 +111,16 @@ export const SeriesFormModal = ({
         <DialogTitle color="primary">
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {selectedSerieToEdit ? <Edit /> : <AddCircleOutline />}
-            <Typography variant="h6">
+            <Typography variant="h6" sx={{ flexGrow: 1 }}>
               {selectedSerieToEdit ? "Edit Serie" : "Add New Serie"}
             </Typography>
+            <IconButton
+              onClick={handleCloseModal}
+              color="error"
+              sx={{ ml: "auto" }}
+            >
+              <CancelIcon fontSize="large" />
+            </IconButton>
           </Box>
         </DialogTitle>
 
@@ -176,6 +183,7 @@ export const SeriesFormModal = ({
             fullWidth
             margin="normal"
             type="number"
+            defaultValue={2000}
             inputProps={{ min: 1900, max: new Date().getFullYear() }}
             {...register("release_year", {
               // required: "Release year is required",

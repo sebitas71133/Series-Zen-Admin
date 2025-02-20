@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import {
   useAddTemporadaMutation,
   useDeleteTemporadaMutation,
@@ -19,14 +19,12 @@ import AddButton from "../components/AddButton";
 import { TemporadasList } from "../components/seasons/TemporadasList";
 import { TemporadaFormModal } from "../components/seasons/TemporadaFormModal";
 import { SubmitLoading } from "../components/SubmitLoading";
-import { deleteImageFromStorage } from "../utils/imageUtils";
+
 import { Loading } from "../components/Loading";
+import { deleteSeasonWithImages } from "../utils/deleteElementWithImages";
 
 export const TemporadasPage = () => {
-  const { slug } = useParams();
-  const location = useLocation();
-  const { seriesId } = location.state;
-  console.log(seriesId);
+  const { serieId } = useParams();
 
   const [errorMessage, setErrorMessage] = useState(null);
 
@@ -35,7 +33,7 @@ export const TemporadasPage = () => {
     isSuccess: isSuccessTemporadas,
     isLoading: isLoadingTemporadas,
     isError: errorTemporadas,
-  } = useFetchTemporadasQuery(slug);
+  } = useFetchTemporadasQuery(serieId);
 
   const [
     addTemporada,
@@ -158,11 +156,12 @@ export const TemporadasPage = () => {
     const { id, poster_image } = selectedTemporadaToDelete;
 
     //Se elimina la imagen asociada si existe
-    if (poster_image) {
-      await deleteImageFromStorage(poster_image);
-    }
+    // if (poster_image) {
+    //   await deleteImageFromStorage(poster_image);
+    // }
 
     try {
+      await deleteSeasonWithImages(id);
       // Eliminar la temporada de la base de datos mediante el id
       await deleteTemporada(id).unwrap();
       console.log("✅ Temporada eliminada con ID:", id);
@@ -200,7 +199,7 @@ export const TemporadasPage = () => {
           selectedTemporadaToEdit={selectedTemporadaToEdit}
           onSubmit={handleSubmitTemporada}
           isLoading={isLoading}
-          seriesId={seriesId}
+          serieId={serieId}
         ></TemporadaFormModal>
 
         {/* Se muestra mensaje de agregar/actualiza/eliminar */}

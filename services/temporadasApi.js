@@ -9,12 +9,12 @@ export const temporadasApi = createApi({
 
   endpoints: (builder) => ({
     fetchTemporadas: builder.query({
-      queryFn: async (slug) => {
+      queryFn: async (serieId) => {
         try {
           const { data, error } = await supabase
             .from("SEASON")
-            .select("*, SERIES!inner(slug, id)")
-            .eq("SERIES.slug", slug)
+            .select("*")
+            .eq("series_id", serieId)
             .order("season_number", { ascending: true });
           if (error) throw error;
 
@@ -25,6 +25,7 @@ export const temporadasApi = createApi({
       },
       providesTags: ["Temporadas"],
     }),
+
     addTemporada: builder.mutation({
       queryFn: async (newTemporada) => {
         try {

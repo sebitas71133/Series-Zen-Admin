@@ -18,8 +18,6 @@ export const useImageUpload = (initialUrl, folder = "temporadas") => {
 
   const handleImageChange = (file) => {
     if (!file) {
-      console.log("No file selected");
-
       setImageUrl({ file: null, url: "", isDeleted: true, isChanged: true });
       return;
     }

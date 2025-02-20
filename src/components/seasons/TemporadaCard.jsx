@@ -18,19 +18,11 @@ export const TemporadaCard = ({
   handleOpenEditModal,
   handleDeleteElement: handleConfirmDeleteTemporada,
 }) => {
-  const { slug } = useParams();
+  const { serieId } = useParams();
   const navigate = useNavigate();
   const handleViewEpisodes = () => {
-    // navigate(`/admin/series/${serie.slug}/temporadas`);
-    navigate(
-      `/admin/series/${slug}/temporadas/${temporada.season_number}/episodios`,
-      {
-        state: { temporadaId: temporada.id },
-      }
-    );
+    navigate(`/admin/series/${serieId}/temporadas/${temporada.id}/episodios`);
   };
-
-  console.log(temporada);
 
   return (
     <Grid2 size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>

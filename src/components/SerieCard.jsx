@@ -19,11 +19,9 @@ export const SerieCard = ({
   handleDeleteElement: handleDeleteSerie,
 }) => {
   const navigate = useNavigate();
+
   const handleViewSeasons = () => {
-    // navigate(`/admin/series/${serie.slug}/temporadas`);
-    navigate(`/admin/series/${serie.slug}/temporadas`, {
-      state: { seriesId: serie.id, slug: serie.slug },
-    });
+    navigate(`/admin/series/${serie.id}/temporadas`);
   };
 
   return (

@@ -11,8 +11,6 @@ export const episodesApi = createApi({
     fetchEpisodes: builder.query({
       queryFn: async (seasonId) => {
         try {
-          console.log(seasonId);
-
           const { data, error } = await supabase
             .from("EPISODES")
             .select("*")

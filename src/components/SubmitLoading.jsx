@@ -10,16 +10,6 @@ export const SubmitLoading = ({
   isEditing,
   isDeleteSuccess,
 }) => {
-  console.log({
-    open,
-    onClose,
-    isSubmitting,
-    success,
-    errorMessage,
-    isEditing,
-    isDeleteSuccess,
-  });
-
   return (
     <>
       {isSubmitting && <LinearProgress />}

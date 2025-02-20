@@ -8,9 +8,11 @@ import {
   Grid2,
   TextField,
   Typography,
+  IconButton,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { set, useForm } from "react-hook-form";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 import { AddCircleOutline, Edit } from "@mui/icons-material";
 import { ImageUpload } from "../ImageUpload";
@@ -25,7 +27,7 @@ export const TemporadaFormModal = ({
   selectedTemporadaToEdit,
   onSubmit,
   isLoading,
-  seriesId,
+  serieId,
 }) => {
   const {
     register,
@@ -54,8 +56,6 @@ export const TemporadaFormModal = ({
       handleImageChange(null);
       console.log("Temporada para no editar");
     }
-
-    console.log("effect", selectedTemporadaToEdit);
   }, [selectedTemporadaToEdit, setValue, handleCloseModal]);
 
   const onSubmitForm = async (formData) => {
@@ -79,7 +79,7 @@ export const TemporadaFormModal = ({
       // Crear objeto con los datos de la serie
       newTemporada = {
         ...cleanedData,
-        series_id: seriesId,
+        series_id: serieId,
 
         poster_image: imageUrl,
       };
@@ -111,9 +111,16 @@ export const TemporadaFormModal = ({
         <DialogTitle color="primary">
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {selectedTemporadaToEdit ? <Edit /> : <AddCircleOutline />}
-            <Typography variant="h6">
+            <Typography variant="h6" flexGrow={1}>
               {selectedTemporadaToEdit ? "Edit Season" : "Add New Season"}
             </Typography>
+            <IconButton
+              onClick={handleCloseModal}
+              color="error"
+              sx={{ ml: "auto" }}
+            >
+              <CancelIcon fontSize="large" />
+            </IconButton>
           </Box>
         </DialogTitle>
 

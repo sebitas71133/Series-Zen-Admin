@@ -13,7 +13,6 @@ import { useCallback, useEffect, useState } from "react";
 import SerieFilters from "../components/SerieFilters";
 
 import AddButton from "../components/AddButton";
-import SeriesList from "../components/SeriesList";
 
 import { Loading } from "../components/Loading";
 
@@ -26,7 +25,7 @@ import {
   useUpdateSerieMutation,
 } from "../../services/seriesApi";
 import { SubmitLoading } from "../components/SubmitLoading";
-import { deleteImageFromStorage } from "../utils/imageUtils";
+
 import { deleteSeriesWithImages } from "../utils/deleteElementWithImages";
 
 import { ItemsList } from "../components/common/ItemsList";
@@ -143,22 +142,23 @@ export default function SeriesPage() {
   const handleConfirmDeleteSerie = async () => {
     if (!selectedSerieToDelete) return;
     setErrorMessage(null);
-    const { id, cover_image, banner_image } = selectedSerieToDelete;
+    //const { id, cover_image, banner_image } = selectedSerieToDelete;
+    const { id } = selectedSerieToDelete;
 
     //Eliminar todas las imagenes de sus temporadas tambien
-    await deleteSeriesWithImages(id);
 
     // 🔹 2. Eliminar imágenes de portada y banner en paralelo
-    const deleteCover = cover_image
-      ? deleteImageFromStorage(cover_image)
-      : null;
-    const deleteBanner = banner_image
-      ? deleteImageFromStorage(banner_image)
-      : null;
+    //  const deleteCover = cover_image
+    //    ? deleteImageFromStorage(cover_image)
+    //    : null;
+    //  const deleteBanner = banner_image
+    //   ? deleteImageFromStorage(banner_image)
+    //    : null;
 
-    await Promise.all([deleteCover, deleteBanner].filter(Boolean));
+    // await Promise.all([deleteCover, deleteBanner].filter(Boolean));
 
     try {
+      await deleteSeriesWithImages(id);
       await deleteSerie(id).unwrap();
       console.log("Eliminado serie con id:", id);
     } catch (error) {
@@ -177,7 +177,7 @@ export default function SeriesPage() {
   return (
     <>
       <Box>
-        <SerieFilters />
+        {/* <SerieFilters /> */}
         {/* BOTON PARA AGREGAR SERIE */}
         {/* Manejador para abir el modal en el caso de añadir serie */}
         <AddButton

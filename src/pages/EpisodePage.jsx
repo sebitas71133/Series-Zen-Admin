@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@mui/material";
 import React, { useCallback, useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import {
   useAddEpisodeMutation,
   useDeleteEpisodeMutation,
@@ -22,17 +22,14 @@ import AddButton from "../components/AddButton";
 import { ItemsList } from "../components/common/ItemsList";
 import { EpisodeCard } from "../components/episodes/EpisodeCard";
 import { deleteImageFromStorage } from "../utils/imageUtils";
-import { SeriesFormModal } from "../components/SeriesFormModal";
+
 import { SubmitLoading } from "../components/SubmitLoading";
 import { EpisodeFormModal } from "../components/episodes/EpisodeFormModal";
 
 export const EpisodePage = () => {
   /*  DATA DEL SLUG, SEASON_NUMBER, TEMPORADA_  */
 
-  const { slug, season_number } = useParams();
-
-  const location = useLocation();
-  const { temporadaId } = location.state;
+  const { seasonId: temporadaId } = useParams();
 
   /******************************************************** */
 
@@ -168,18 +165,13 @@ export const EpisodePage = () => {
   };
 
   /*********************************************************************** */
+
   if (isLoadingEpisodesData) return <Loading />;
-
-  if (!episodesData.length) {
-    console.info("No hay series aun");
-  }
-
-  console.log(episodesData);
 
   return (
     <>
       <Box>
-        <SerieFilters />
+        {/* <SerieFilters /> */}
         <AddButton
           handleOpenAddModal={handleOpenAddModal}
           message={"Add Episode"}

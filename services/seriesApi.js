@@ -19,6 +19,7 @@ export const seriesApi = createApi({
       },
       providesTags: ["Series"], // Proporciona la etiqueta 'Series'
     }),
+
     addSerie: builder.mutation({
       queryFn: async (newSerie) => {
         try {
