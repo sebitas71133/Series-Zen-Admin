@@ -1,8 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 
-import NotFoundPage from "../src/components/NotFoundPage";
 import { AdminLayout } from "../src/layout/AdminLayout";
-import ErrorBoundary from "../src/components/ErrorBoundary";
 
 import HomePage from "../src/pages/HomePage";
 import PublicLayout from "../src/layout/PublicLayout";
@@ -11,6 +9,9 @@ import ProtectedLayout from "../src/layout/ProtectedLayout";
 import SeriesPage from "../src/pages/SeriesPage";
 import { TemporadasPage } from "../src/pages/TemporadasPage";
 import { EpisodePage } from "../src/pages/EpisodePage";
+import ErrorBoundary from "../src/components/common/ErrorBoundary";
+import NotFoundPage from "../src/components/common/NotFoundPage";
+import LoginDemoPage from "../src/pages/LoginDemoPage";
 
 const routes = [
   //RUTAS PUBLICAS
@@ -20,6 +21,7 @@ const routes = [
     children: [
       { index: true, element: <HomePage></HomePage> },
       { path: "login", element: <LoginPage></LoginPage> },
+      { path: "loginDemo", element: <LoginDemoPage /> },
     ],
     errorBoundary: <ErrorBoundary />,
   },
@@ -43,6 +45,21 @@ const routes = [
       },
     ],
   },
+  //RUTAS DEMO
+  // {
+  //   path: "/demo",
+  //   element: <DemoLayout />,
+  //   children: [
+  //     { index: true, element: <SeriesPage /> },
+  //     { path: "series", element: <SeriesPage /> }, //Se carga en `/admin/series`
+  //     { path: "series/:serieId/temporadas", element: <TemporadasPage /> },
+  //     {
+  //       path: "series/:serieId/temporadas/:seasonId/episodios",
+  //       element: <EpisodePage />,
+  //     },
+  //   ],
+  // },
+
   {
     path: "*",
     element: <NotFoundPage />,

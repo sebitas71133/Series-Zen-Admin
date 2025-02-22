@@ -16,9 +16,10 @@ export const temporadasApi = createApi({
             .select("*")
             .eq("series_id", serieId)
             .order("season_number", { ascending: true });
-          if (error) throw error;
+          //  if (error) throw error;
+          console.log(data);
 
-          return { data };
+          return { data, error };
         } catch (error) {
           return { error: { message: error.message } };
         }
@@ -76,6 +77,12 @@ export const temporadasApi = createApi({
           console.log({ data, error });
 
           if (error) throw error;
+
+          if (!data || data.length === 0) {
+            throw new Error(
+              "No tienes permisos para eliminar esta serie o la serie no existe."
+            );
+          }
           return { data };
         } catch (error) {
           return { error: { message: error.message } };

@@ -15,11 +15,12 @@ import { set, useForm } from "react-hook-form";
 import CancelIcon from "@mui/icons-material/Cancel";
 
 import { AddCircleOutline, Edit } from "@mui/icons-material";
-import { ImageUpload } from "../ImageUpload";
+import { ImageUpload } from "../common/ImageUpload";
 
 import { useImageUpload } from "../../hooks/useImageUpload";
 import { cleanObject } from "../../utils/cleanObject";
 import { deleteImageFromStorage } from "../../utils/imageUtils";
+import { useSelector } from "react-redux";
 
 export const TemporadaFormModal = ({
   handleCloseModal,
@@ -43,6 +44,8 @@ export const TemporadaFormModal = ({
     uploadImage,
   } = useImageUpload(selectedTemporadaToEdit?.poster_image, "temporadas");
 
+  const { email, loading } = useSelector((state) => state.session);
+
   useEffect(() => {
     if (selectedTemporadaToEdit) {
       setValue("season_number", selectedTemporadaToEdit.season_number);
@@ -56,7 +59,7 @@ export const TemporadaFormModal = ({
       handleImageChange(null);
       console.log("Temporada para no editar");
     }
-  }, [selectedTemporadaToEdit, setValue, handleCloseModal]);
+  }, [selectedTemporadaToEdit, setValue, openModal]);
 
   const onSubmitForm = async (formData) => {
     console.log(formData);
@@ -189,7 +192,7 @@ export const TemporadaFormModal = ({
             type="submit"
             variant="contained"
             color="primary"
-            disabled={isLoading}
+            disabled={isLoading || email === "demo@zen.com"}
           >
             {isLoading
               ? "Saving..."

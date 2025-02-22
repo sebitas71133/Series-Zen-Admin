@@ -12,8 +12,8 @@ const AddButton = ({ handleOpenAddModal, message }) => {
         mb: 4,
       }}
     >
-      <Typography variant="h4" component="h1">
-        Series ZeN
+      <Typography variant="h4" color="primary" component="h1">
+        Temporadas
       </Typography>
       <Button
         variant="contained"

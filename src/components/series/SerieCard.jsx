@@ -12,6 +12,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 export const SerieCard = ({
   data: serie,
@@ -21,8 +22,10 @@ export const SerieCard = ({
   const navigate = useNavigate();
 
   const handleViewSeasons = () => {
-    navigate(`/admin/series/${serie.id}/temporadas`);
+    navigate(`/admin/series/${serie.id}/temporadas`, { replace: true });
   };
+
+  const { email, loading } = useSelector((state) => state.session);
 
   return (
     <Grid2 size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
@@ -110,6 +113,7 @@ export const SerieCard = ({
               size="small"
               color="error"
               onClick={() => handleDeleteSerie(serie)}
+              disabled={email === "demo@zen.com"}
             >
               <DeleteIcon /> Delete
             </Button>

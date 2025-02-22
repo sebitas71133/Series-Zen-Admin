@@ -10,13 +10,11 @@ import {
 
 import { useCallback, useEffect, useState } from "react";
 
-import SerieFilters from "../components/SerieFilters";
+import SerieFilters from "../components/common/SerieFilters";
 
-import AddButton from "../components/AddButton";
+import AddButton from "../components/common/AddButton";
 
-import { Loading } from "../components/Loading";
-
-import { SeriesFormModal } from "../components/SeriesFormModal";
+import { Loading } from "../components/common/Loading";
 
 import {
   useAddSerieMutation,
@@ -24,12 +22,13 @@ import {
   useFetchSeriesQuery,
   useUpdateSerieMutation,
 } from "../../services/seriesApi";
-import { SubmitLoading } from "../components/SubmitLoading";
+import { SubmitLoading } from "../components/common/SubmitLoading";
 
 import { deleteSeriesWithImages } from "../utils/deleteElementWithImages";
 
 import { ItemsList } from "../components/common/ItemsList";
-import { SerieCard } from "../components/SerieCard";
+import { SerieCard } from "../components/series/SerieCard";
+import { SeriesFormModal } from "../components/series/SeriesFormModal";
 
 export default function SeriesPage() {
   // const [series, setSeries] = useState(initialSeries);
@@ -90,6 +89,9 @@ export default function SeriesPage() {
     } catch (error) {
       setErrorMessage(error.message);
       console.error("Error:", error);
+      throw error; //Para que lo capture "onSubmit"
+    } finally {
+      setSnackbarOpen(true);
     }
   };
 
@@ -162,6 +164,7 @@ export default function SeriesPage() {
       await deleteSerie(id).unwrap();
       console.log("Eliminado serie con id:", id);
     } catch (error) {
+      setErrorMessage(error.message);
       console.error("Error eliminando serie:", error);
     } finally {
       setSnackbarOpen(true);

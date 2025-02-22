@@ -20,6 +20,21 @@ export const seriesApi = createApi({
       providesTags: ["Series"], // Proporciona la etiqueta 'Series'
     }),
 
+    fetchSerieById: builder.query({
+      queryFn: async (serieId) => {
+        try {
+          const { data, error } = await supabase
+            .from("SERIES")
+            .select("*")
+            .eq("id", serieId);
+          if (error) throw error;
+          return { data };
+        } catch (error) {
+          return { error: { message: error.message } };
+        }
+      },
+    }),
+
     addSerie: builder.mutation({
       queryFn: async (newSerie) => {
         try {
@@ -67,10 +82,18 @@ export const seriesApi = createApi({
             .delete()
             .eq("id", id)
             .select();
+
           console.log({ data, error });
 
-          if (error) throw error;
-          return { data };
+          // if (error) throw error;
+
+          if (!data || data.length === 0) {
+            throw new Error(
+              "No tienes permisos para eliminar esta serie o la serie no existe."
+            );
+          }
+
+          return { data, error };
         } catch (error) {
           return { error: { message: error.message } };
         }
@@ -85,4 +108,5 @@ export const {
   useAddSerieMutation,
   useUpdateSerieMutation,
   useDeleteSerieMutation,
+  useFetchSerieByIdQuery,
 } = seriesApi;

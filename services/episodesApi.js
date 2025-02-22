@@ -74,8 +74,12 @@ export const episodesApi = createApi({
 
           console.log({ data, error });
 
-          if (error) throw error;
-          return { data };
+          if (!data || data.length === 0) {
+            throw new Error(
+              "No tienes permisos para eliminar esta serie o la serie no existe."
+            );
+          }
+          return { data, error };
         } catch (error) {
           return { error: { message: error.message } };
         }

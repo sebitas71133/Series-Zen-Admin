@@ -12,17 +12,18 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { ImageUpload } from "./ImageUpload";
-import { SubmitLoading } from "./SubmitLoading";
+import { ImageUpload } from "../common/ImageUpload";
+import { SubmitLoading } from "../common/SubmitLoading";
 import { AddCircleOutline, Edit } from "@mui/icons-material";
 import CancelIcon from "@mui/icons-material/Cancel";
 
 import {
   deleteImageFromStorage,
   uploadImageToStorage,
-} from "../utils/imageUtils";
-import { useImageUpload } from "../hooks/useImageUpload";
-import { cleanObject } from "../utils/cleanObject";
+} from "../../utils/imageUtils";
+import { useImageUpload } from "../../hooks/useImageUpload";
+import { cleanObject } from "../../utils/cleanObject";
+import { useSelector } from "react-redux";
 
 export const SeriesFormModal = ({
   handleCloseModal,
@@ -38,6 +39,8 @@ export const SeriesFormModal = ({
     reset,
     formState: { errors },
   } = useForm();
+
+  const { email, loading } = useSelector((state) => state.session);
 
   const {
     image: cover_image,
@@ -65,7 +68,7 @@ export const SeriesFormModal = ({
       //handleBannerChange(null);
       console.log("serie no eleccionada serie");
     }
-  }, [selectedSerieToEdit, setValue, handleCloseModal]);
+  }, [selectedSerieToEdit, setValue, openModal]);
 
   const onSubmitForm = async (formData) => {
     console.log(formData);
@@ -234,7 +237,7 @@ export const SeriesFormModal = ({
             type="submit"
             variant="contained"
             color="primary"
-            disabled={isLoading}
+            disabled={isLoading || email === "demo@zen.com"}
           >
             {isLoading
               ? "Saving..."

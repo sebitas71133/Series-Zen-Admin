@@ -12,12 +12,14 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import React from "react";
+import { useSelector } from "react-redux";
 
 export const EpisodeCard = ({
   data: episode,
   handleOpenEditModal,
   handleDeleteElement: handleConfirmDeleteEpisode,
 }) => {
+  const { email, loading } = useSelector((state) => state.session);
   return (
     <Grid2 size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
       <Card
@@ -103,6 +105,7 @@ export const EpisodeCard = ({
               size="small"
               color="error"
               onClick={() => handleConfirmDeleteEpisode(episode)}
+              disabled={email === "demo@zen.com"}
             >
               <DeleteIcon /> Delete
             </Button>

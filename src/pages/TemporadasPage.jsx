@@ -15,13 +15,17 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
-import AddButton from "../components/AddButton";
-import { TemporadasList } from "../components/seasons/TemporadasList";
-import { TemporadaFormModal } from "../components/seasons/TemporadaFormModal";
-import { SubmitLoading } from "../components/SubmitLoading";
 
-import { Loading } from "../components/Loading";
+import { TemporadaFormModal } from "../components/seasons/TemporadaFormModal";
+import { SubmitLoading } from "../components/common/SubmitLoading";
+
 import { deleteSeasonWithImages } from "../utils/deleteElementWithImages";
+import { useFetchSerieByIdQuery } from "../../services/seriesApi";
+import AddButton from "../components/common/AddButton";
+import { ItemsList } from "../components/common/ItemsList";
+import { Loading } from "../components/common/Loading";
+import SerieInfo from "../components/series/SerieInfo";
+import { TemporadaCard } from "../components/seasons/TemporadaCard";
 
 export const TemporadasPage = () => {
   const { serieId } = useParams();
@@ -34,6 +38,13 @@ export const TemporadasPage = () => {
     isLoading: isLoadingTemporadas,
     isError: errorTemporadas,
   } = useFetchTemporadasQuery(serieId);
+
+  const {
+    data: serieData,
+    isSuccess: isSerieSuccess,
+    isLoading: isSerieLoading,
+  } = useFetchSerieByIdQuery(serieId);
+  console.log(serieData);
 
   const [
     addTemporada,
@@ -169,6 +180,7 @@ export const TemporadasPage = () => {
       console.error("❌ Error al eliminar la temporada:", error);
       setErrorMessage(error.message);
     } finally {
+      setSnackbarOpen(true);
       handleCloseDeleteConfirmation();
     }
 
@@ -184,15 +196,21 @@ export const TemporadasPage = () => {
   return (
     <>
       <Box>
+        <SerieInfo
+          serie={serieData}
+          isSuccess={isSerieSuccess}
+          isLoading={isSerieLoading}
+        />
         <AddButton
           message={"Add Season"}
           handleOpenAddModal={handleOpenAddModal}
         ></AddButton>
-        <TemporadasList
-          temporadas={temporadasData}
+        <ItemsList
+          CardComponent={TemporadaCard}
+          items={temporadasData}
           handleDeleteElement={handleOpenDeleteConfirmation}
           handleOpenEditModal={handleOpenEditModal}
-        ></TemporadasList>
+        ></ItemsList>
         <TemporadaFormModal
           handleCloseModal={handleCloseModal}
           openModal={openModal}

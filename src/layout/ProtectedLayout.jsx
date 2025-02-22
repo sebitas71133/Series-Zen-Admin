@@ -2,7 +2,7 @@ import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
 import { useSelector } from "react-redux";
-import { Loading } from "../components/Loading";
+import { Loading } from "../components/common/Loading";
 
 const ProtectedLayout = () => {
   const { session, loading } = useSelector((state) => state.session);

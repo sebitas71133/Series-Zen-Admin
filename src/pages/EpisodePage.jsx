@@ -15,15 +15,15 @@ import {
   useFetchEpisodesQuery,
   useUpdateEpisodeMutation,
 } from "../../services/episodesApi";
-import { Loading } from "../components/Loading";
-import SerieFilters from "../components/SerieFilters";
+import { Loading } from "../components/common/Loading";
+import SerieFilters from "../components/common/SerieFilters";
 
-import AddButton from "../components/AddButton";
+import AddButton from "../components/common/AddButton";
 import { ItemsList } from "../components/common/ItemsList";
 import { EpisodeCard } from "../components/episodes/EpisodeCard";
 import { deleteImageFromStorage } from "../utils/imageUtils";
 
-import { SubmitLoading } from "../components/SubmitLoading";
+import { SubmitLoading } from "../components/common/SubmitLoading";
 import { EpisodeFormModal } from "../components/episodes/EpisodeFormModal";
 
 export const EpisodePage = () => {
@@ -158,8 +158,9 @@ export const EpisodePage = () => {
       console.log("Eliminado episode con id:", id);
     } catch (error) {
       console.error("Error eliminando episode:", error);
+      setErrorMessage(error.message);
     } finally {
-      // setSnackbarOpen(true);
+      setSnackbarOpen(true);
       handleCloseDeleteConfirmation();
     }
   };

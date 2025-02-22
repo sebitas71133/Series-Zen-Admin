@@ -12,8 +12,13 @@ const BreadcrumbsComponent = () => {
     <Link
       key="home"
       underline="hover"
-      color="inherit"
-      onClick={() => navigate("/admin")}
+      color="primary"
+      variant="body1"
+      onClick={() =>
+        navigate("/admin", {
+          replace: true,
+        })
+      }
       sx={{ cursor: "pointer" }}
     >
       Home
@@ -21,8 +26,13 @@ const BreadcrumbsComponent = () => {
     <Link
       key="series"
       underline="hover"
-      color="inherit"
-      onClick={() => navigate("/admin/series")}
+      color="primary"
+      variant="body1"
+      onClick={() =>
+        navigate("/admin/series", {
+          replace: true,
+        })
+      }
       sx={{ cursor: "pointer" }}
     >
       Series
@@ -31,15 +41,20 @@ const BreadcrumbsComponent = () => {
       <Link
         key="serie-name"
         underline="hover"
-        color="inherit"
-        onClick={() => navigate(`/admin/series/${serieId}/temporadas`)}
+        color="primary"
+        variant="body1"
+        onClick={() =>
+          navigate(`/admin/series/${serieId}/temporadas`, {
+            replace: true,
+          })
+        }
         sx={{ cursor: "pointer" }}
       >
         Temporadas
       </Link>
     ) : null,
     seasonId ? (
-      <Typography key="episodios" color="text.primary">
+      <Typography key="episodios" color="primary" variant="body1">
         Episodios
       </Typography>
     ) : null,
@@ -50,6 +65,7 @@ const BreadcrumbsComponent = () => {
       <Breadcrumbs
         separator={<NavigateNextIcon fontSize="medium" />}
         aria-label="breadcrumb"
+        color="secondary"
       >
         {breadcrumbs}
       </Breadcrumbs>

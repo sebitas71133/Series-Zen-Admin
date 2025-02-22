@@ -54,7 +54,7 @@ const AppBarComponent = (props) => {
           <MenuIcon />
         </IconButton>
         <Typography variant="h6" noWrap component="div">
-          Persistent drawer
+          SERIES ZEN
         </Typography>
       </Toolbar>
     </AppBar>

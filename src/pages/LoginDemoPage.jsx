@@ -6,7 +6,7 @@ import { supabase } from "../../config/supabaseClient";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 
-const LoginPage = () => {
+const LoginDemoPage = () => {
   return (
     <Box
       sx={{
@@ -20,12 +20,15 @@ const LoginPage = () => {
       <Box flexGrow={0}>
         <Box sx={{ mb: 5 }}>
           <Typography variant="h4" color="primary">
-            LOGIN USER
+            Email : demo@zen.com
+          </Typography>
+          <Typography variant="h4" color="secondary">
+            Password : 1234
           </Typography>
         </Box>
         <Auth
           supabaseClient={supabase}
-          providers={["google", "facebook", "twitter"]}
+          providers={[]}
           appearance={{
             theme: ThemeSupa,
           }}
@@ -40,4 +43,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default LoginDemoPage;

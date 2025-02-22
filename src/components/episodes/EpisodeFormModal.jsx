@@ -14,7 +14,7 @@ import React, { useEffect, useState } from "react";
 import { Controller, set, useForm } from "react-hook-form";
 
 import { AddCircleOutline, Edit } from "@mui/icons-material";
-import { ImageUpload } from "../ImageUpload";
+import { ImageUpload } from "../common/ImageUpload";
 import CancelIcon from "@mui/icons-material/Cancel";
 
 import { useImageUpload } from "../../hooks/useImageUpload";
@@ -23,6 +23,7 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import { deleteImageFromStorage } from "../../utils/imageUtils";
+import { useSelector } from "react-redux";
 
 export const EpisodeFormModal = ({
   handleCloseModal,
@@ -51,6 +52,8 @@ export const EpisodeFormModal = ({
     uploadImage,
   } = useImageUpload(selectedEpisodeToEdit?.thumbnail_image, "episodes");
 
+  const { email, loading } = useSelector((state) => state.session);
+
   useEffect(() => {
     if (selectedEpisodeToEdit) {
       setValue("episode_number", selectedEpisodeToEdit.episode_number);
@@ -64,7 +67,8 @@ export const EpisodeFormModal = ({
     } else {
       reset();
     }
-  }, [selectedEpisodeToEdit, setValue, handleCloseModal]);
+    console.log("effect ");
+  }, [selectedEpisodeToEdit, setValue, openModal]);
 
   const onSubmitForm = async (formData) => {
     let newEpisode = null;
@@ -251,7 +255,7 @@ export const EpisodeFormModal = ({
             type="submit"
             variant="contained"
             color="primary"
-            disabled={isLoading}
+            disabled={email === "demo@zen.com"}
           >
             {isLoading
               ? "Saving..."

@@ -8,6 +8,7 @@ const sessionSlice = createSlice({
     authToken: null,
     session: null,
     loading: true,
+    email: null,
   },
 
   reducers: {
@@ -18,6 +19,7 @@ const sessionSlice = createSlice({
       state.isAuthenticated = !!session;
       state.user = user;
       state.authToken = session?.access_token || null;
+      state.email = session?.user.email;
       // Guardar en localStorage
       if (session) {
         localStorage.setItem("access_token", session.access_token);

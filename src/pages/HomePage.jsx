@@ -1,7 +1,8 @@
 import { Image } from "@mui/icons-material";
 import { Box, Button, CardMedia, Container, Typography } from "@mui/material";
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import GitHubIcon from "@mui/icons-material/GitHub";
 
 const HomePage = () => {
   return (
@@ -32,17 +33,26 @@ const HomePage = () => {
           backgroundColor: "black",
         }}
       >
-        <CardMedia
-          component="img"
-          image={"serieszen_recorted.png"}
-          alt={"zen"}
-          sx={{
-            maxWidth: 80,
-            borderRadius: 2,
-            display: { xs: "none", sm: "block" },
-          }}
-        />
-
+        <Box sx={{ display: "flex", gap: 2, mb: { xs: 2, sm: 0 } }}>
+          <CardMedia
+            component="img"
+            image={"me.jpg"}
+            alt={"zen"}
+            sx={{
+              maxWidth: 35,
+              borderRadius: 2,
+              // display: { xs: "none", sm: "block" },
+            }}
+          />
+          <Button
+            sx={{ p: 0 }}
+            onClick={() =>
+              window.open("https://github.com/sebitas71133", "_blank")
+            }
+          >
+            <GitHubIcon fontSize="large" sx={{ color: "white" }} />
+          </Button>
+        </Box>
         <Box sx={{ display: "flex", gap: 2 }}>
           <Link to={"login"}>
             <Button
@@ -51,7 +61,7 @@ const HomePage = () => {
               sx={{
                 "&:hover": {
                   backgroundColor: "text.secondary",
-                  color: "black",
+                  color: "white",
                 },
                 fontSize: "1rem",
               }}
@@ -59,27 +69,22 @@ const HomePage = () => {
               INGRESA
             </Button>
           </Link>
-          <Button
-            variant="outlined"
-            color="secondary"
-            sx={{
-              // backgroundColor: "#0F0FFF",
-              // color: "white",
-              // "&:hover": {
-              //   backgroundColor: "#0000DD",
-              // },
-
-              "&:hover": {
-                backgroundColor: "text.secondary",
-                color: "black",
-              },
-              padding: "0.5rem 2rem",
-              // fontSize: "1rem",
-              color: "text.primary",
-            }}
-          >
-            SUSCRÍBETE AHORA
-          </Button>
+          <Link to={"loginDemo"}>
+            <Button
+              variant="outlined"
+              color="secondary"
+              sx={{
+                "&:hover": {
+                  backgroundColor: "text.secondary",
+                  color: "white",
+                },
+                // padding: "0.5rem 2rem",
+                fontSize: "1rem",
+              }}
+            >
+              DEMO
+            </Button>
+          </Link>
         </Box>
       </Box>
       {/* -------------------------------------- */}
