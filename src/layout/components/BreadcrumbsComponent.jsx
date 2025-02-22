@@ -50,12 +50,12 @@ const BreadcrumbsComponent = () => {
         }
         sx={{ cursor: "pointer" }}
       >
-        Temporadas
+        Seasons
       </Link>
     ) : null,
     seasonId ? (
       <Typography key="episodios" color="primary" variant="body1">
-        Episodios
+        Episodes
       </Typography>
     ) : null,
   ].filter(Boolean);

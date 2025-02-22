@@ -2,7 +2,7 @@ import { Box, Button, Typography } from "@mui/material";
 import React from "react";
 import AddIcon from "@mui/icons-material/Add";
 
-const AddButton = ({ handleOpenAddModal, message }) => {
+const AddButton = ({ handleOpenAddModal, message, title }) => {
   return (
     <Box
       sx={{
@@ -13,7 +13,7 @@ const AddButton = ({ handleOpenAddModal, message }) => {
       }}
     >
       <Typography variant="h4" color="primary" component="h1">
-        Temporadas
+        {title}
       </Typography>
       <Button
         variant="contained"

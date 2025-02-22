@@ -204,6 +204,7 @@ export const TemporadasPage = () => {
         <AddButton
           message={"Add Season"}
           handleOpenAddModal={handleOpenAddModal}
+          title={"Seasons"}
         ></AddButton>
         <ItemsList
           CardComponent={TemporadaCard}

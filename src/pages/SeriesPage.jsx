@@ -186,6 +186,7 @@ export default function SeriesPage() {
         <AddButton
           handleOpenAddModal={handleOpenAddModal}
           message={"Add Series"}
+          title={"Series"}
         ></AddButton>
         {/* LISTA - GRID DE SERIES */}
         {/* <SeriesList

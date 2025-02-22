@@ -176,6 +176,7 @@ export const EpisodePage = () => {
         <AddButton
           handleOpenAddModal={handleOpenAddModal}
           message={"Add Episode"}
+          title={"Episodes"}
         ></AddButton>
 
         <ItemsList
