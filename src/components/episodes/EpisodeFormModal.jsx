@@ -63,11 +63,10 @@ export const EpisodeFormModal = ({
       setValue("duration", selectedEpisodeToEdit.duration);
       // setValue("poster_image", selectedEpisodeToEdit.poster_image);
 
-      console.log("seleccionado episodio para editar");
+      // console.log("seleccionado episodio para editar");
     } else {
       reset();
     }
-    console.log("effect ");
   }, [selectedEpisodeToEdit, setValue, openModal]);
 
   const onSubmitForm = async (formData) => {
@@ -95,7 +94,7 @@ export const EpisodeFormModal = ({
         thumbnail_image: imageUrl,
       };
 
-      console.log({ newEpisode });
+      //console.log({ newEpisode });
 
       console.log("Datos del episodio a guardar/editar:", newEpisode); // Verifica que las URLs estén correctas
 

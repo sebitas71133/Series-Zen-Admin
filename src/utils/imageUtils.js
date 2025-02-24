@@ -29,7 +29,7 @@ export const uploadImageToStorage = async (file, folder) => {
 };
 
 export const deleteImageFromStorage = async (imageUrl) => {
-  console.log("Deleting image:", imageUrl);
+  // console.log("Deleting image:", imageUrl);
 
   try {
     // Validar la URL
@@ -42,7 +42,7 @@ export const deleteImageFromStorage = async (imageUrl) => {
     const path = url.pathname.split(
       "/storage/v1/object/public/SeriesZenMedia/"
     )[1];
-    console.log("Extracted path:", path);
+    // console.log("Extracted path:", path);
 
     if (!path) {
       throw new Error("No se pudo extraer el path de la imagen");

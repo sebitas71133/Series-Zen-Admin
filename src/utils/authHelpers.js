@@ -27,7 +27,7 @@ export const fetchSession = async () => {
 
 export const initializeSession = async (dispatch) => {
   // 1RO VERIFICAR SI EXISTE TOKEN ALMACENADO EN EL LOCALSTORAGE
-  console.log("USER PROVIDER USO");
+  //console.log("USER PROVIDER USO");
 
   const storedToken = localStorage.getItem("access_token");
   const storedExpiresAt = localStorage.getItem("expires_at");

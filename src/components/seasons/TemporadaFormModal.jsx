@@ -53,11 +53,11 @@ export const TemporadaFormModal = ({
       setValue("release_year", selectedTemporadaToEdit.release_year);
       // setValue("poster_image", selectedTemporadaToEdit.poster_image);
 
-      console.log("seleccionado temporada para editar");
+      //console.log("seleccionado temporada para editar");
     } else {
       reset();
       handleImageChange(null);
-      console.log("Temporada para no editar");
+      //  console.log("Temporada para no editar");
     }
   }, [selectedTemporadaToEdit, setValue, openModal]);
 
@@ -87,7 +87,7 @@ export const TemporadaFormModal = ({
         poster_image: imageUrl,
       };
 
-      console.log({ newTemporada });
+      //  console.log({ newTemporada });
 
       console.log("Datos de la serie a guardar/editar:", newTemporada); // Verifica que las URLs estén correctas
 

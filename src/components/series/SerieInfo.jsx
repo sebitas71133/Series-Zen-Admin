@@ -2,7 +2,7 @@ import { Box, Typography } from "@mui/material";
 import { Loading } from "../common/Loading";
 
 const SerieInfo = ({ serie, isSuccess, isLoading }) => {
-  console.log({ serie, isSuccess, isLoading });
+  // console.log({ serie, isSuccess, isLoading });
 
   if (isLoading) return <Loading />; // Evita renderizar si no hay datos
 

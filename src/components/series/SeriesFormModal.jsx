@@ -62,16 +62,16 @@ export const SeriesFormModal = ({
       setValue("slug", selectedSerieToEdit.slug);
       setValue("release_year", selectedSerieToEdit.release_year);
 
-      console.log("seleccionado serie");
+      //  console.log("seleccionado serie");
     } else {
       reset();
       //handleBannerChange(null);
-      console.log("serie no eleccionada serie");
+      // console.log("serie no eleccionada serie");
     }
   }, [selectedSerieToEdit, setValue, openModal]);
 
   const onSubmitForm = async (formData) => {
-    console.log(formData);
+    // console.log(formData);
 
     try {
       const cleanedData = {
