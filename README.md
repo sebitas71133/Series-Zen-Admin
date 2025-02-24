@@ -42,15 +42,21 @@ npm run dev
 
 ## 🎨 Capturas de pantalla  
 
+
+
 <div align="center">
+  <img src="https://github.com/user-attachments/assets/f3f281a3-d23b-4241-b33b-5faf09962e81" width="45%" />
   <img src="https://github.com/user-attachments/assets/5b0e7ff3-797f-4daf-9bbd-a2655e4aff37" width="45%" />
-  <img src="https://github.com/user-attachments/assets/5dbbf663-be5b-4a12-ad04-65c66381ade2" width="45%" />
 </div>
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/7621150d-afeb-4f84-a321-39e75e4a2fe5" width="30%" />
-  <img src="https://github.com/user-attachments/assets/5b020bbe-7d0d-4be1-af0e-7c250fe83df4" width="30%" />
-  <img src="https://github.com/user-attachments/assets/dbc1be8b-fb81-4a31-945f-ca1cd92c06a5" width="30%" />
+  <img src="https://github.com/user-attachments/assets/5dbbf663-be5b-4a12-ad04-65c66381ade2" width="45%" />
+  <img src="https://github.com/user-attachments/assets/7621150d-afeb-4f84-a321-39e75e4a2fe5" width="45%" />
+</div>
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/5b020bbe-7d0d-4be1-af0e-7c250fe83df4" width="45%" />
+  <img src="https://github.com/user-attachments/assets/dbc1be8b-fb81-4a31-945f-ca1cd92c06a5" width="45%" />
 </div>
 
 
