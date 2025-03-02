@@ -19,7 +19,7 @@
 
 ## 📦 Instalación y ejecución
 
- Clona este repositorio:
+### 1️⃣ Clona este repositorio:
    ```sh
    git clone https://github.com/tuusuario/series-zen-admin.git
    cd series-zen-admin
